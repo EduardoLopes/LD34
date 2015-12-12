@@ -14,7 +14,7 @@ import phoenix.geometry.QuadPackGeometry;
 
 class TiledLevel extends TiledMap{
 
-  var collision_layer_id : Int;
+  var collision_layer_ids : Map<String, Int> = new Map();
   var geom : Map<String, QuadPackGeometry>;
 
   public function new(options:TiledMapOptions){
@@ -29,7 +29,7 @@ class TiledLevel extends TiledMap{
 
     for( layer in layers ) {
 
-      if(layer.name != 'collision'){
+      if(layer.name != 'collision' && layer.name != 'one_way_plataforms'){
 
         var _map_scaled_tw = tile_width*options.scale;
         var _map_scaled_th = tile_height*options.scale;
@@ -121,38 +121,41 @@ class TiledLevel extends TiledMap{
           properties : _layer_properties,
         });
 
-        if(_layer.name == 'collision'){
-          collision_layer_id = layer_index;
-          return;
-        }
+        if(_layer.name == 'collision' || _layer.name == 'one_way_plataforms'){
 
-        //create the tiles
-        add_tiles_fill_by_id( _layer.name, 0 );
+          collision_layer_ids.set(_layer.name, layer_index);
 
-            //Now we iterate the layer and store the tiles id's
-        var tilemap_layer : TileLayer = layers.get(_layer.name);
-        var _gid_counter : Int = 0;
+        } else {
 
-        for(_y in 0 ... _layer.height) {
-          for(_x in 0 ... _layer.width) {
+          //create the tiles
+          add_tiles_fill_by_id( _layer.name, 0 );
 
-            var _layer_tile = _layer.tiles[_gid_counter];
+          //Now we iterate the layer and store the tiles id's
+          var tilemap_layer : TileLayer = layers.get(_layer.name);
+          var _gid_counter : Int = 0;
 
-            if(_layer_tile.id != 0) {
-              var tile = tilemap_layer.tiles[_y][_x];
-              tile.id = _layer_tile.id;
-              tile.flipx = _layer_tile.flip_horizontal;
-              tile.flipy = _layer_tile.flip_vertical;
-              if(_layer_tile.flip_diagonal) {
-                tile.angle = 90;
-                tile.flipx = !tile.flipx;
+          for(_y in 0 ... _layer.height) {
+            for(_x in 0 ... _layer.width) {
+
+              var _layer_tile = _layer.tiles[_gid_counter];
+
+              if(_layer_tile.id != 0) {
+                var tile = tilemap_layer.tiles[_y][_x];
+                tile.id = _layer_tile.id;
+                tile.flipx = _layer_tile.flip_horizontal;
+                tile.flipy = _layer_tile.flip_vertical;
+                if(_layer_tile.flip_diagonal) {
+                  tile.angle = 90;
+                  tile.flipx = !tile.flipx;
+                }
               }
-            }
 
-            _gid_counter++;
+              _gid_counter++;
 
-          } //for x
-        } //for y
+            } //for x
+          } //for y
+
+        }
 
         //increment the index
         layer_index++;
@@ -163,11 +166,11 @@ class TiledLevel extends TiledMap{
 
   public function collision_tile_at(x:Int, y:Int){
 
-    if( tiledmap_data.layers[collision_layer_id] != null ) {
+    if( tiledmap_data.layers[collision_layer_ids.get('collision')] != null ) {
 
-      if( tiledmap_data.layers[collision_layer_id].tiles[y * tiledmap_data.width + x] != null ){
+      if( tiledmap_data.layers[collision_layer_ids.get('collision')].tiles[y * tiledmap_data.width + x] != null ){
 
-        return tiledmap_data.layers[collision_layer_id].tiles[y * tiledmap_data.width + x];
+        return tiledmap_data.layers[collision_layer_ids.get('collision')].tiles[y * tiledmap_data.width + x];
 
       }
 
@@ -185,7 +188,7 @@ class TiledLevel extends TiledMap{
 
   }
 
-  public function collision_bounds_fitted():Array<Polygon> {
+  public function collision_bounds_fitted(layerName : String):Array<Polygon> {
 
     var checked:Array<Null<Bool>> = [];
     var rectangles:Array<Polygon> = [];
@@ -199,7 +202,7 @@ class TiledLevel extends TiledMap{
       for(x in 0...width) {
 
         index = y * width + x;
-        tileID = tiledmap_data.layers[collision_layer_id].tiles[index].id;
+        tileID = tiledmap_data.layers[collision_layer_ids.get(layerName)].tiles[index].id;
 
         if(tileID > 0 && (checked[index] == false || checked[index] == null)) {
 
@@ -212,7 +215,7 @@ class TiledLevel extends TiledMap{
         } else if(tileID == 0 || checked[index] == true) {
 
           if(startCol != -1) {
-            rectangles.push(find_bounds_rect(y, startCol, x, checked));
+            rectangles.push(find_bounds_rect(y, startCol, x, checked, layerName));
             startCol = -1;
           }
 
@@ -221,7 +224,7 @@ class TiledLevel extends TiledMap{
       } //x in 0...width
 
       if(startCol != -1) {
-        rectangles.push(find_bounds_rect(y, startCol, width, checked));
+        rectangles.push(find_bounds_rect(y, startCol, width, checked, layerName));
         startCol = -1;
       }
 
@@ -232,7 +235,7 @@ class TiledLevel extends TiledMap{
   } //bounds_fitted
 
     /** Finds the largest bounding rect around tiles with id > 0 between start_x and end_x, starting at start_y and going down as far as possible */
-  function find_bounds_rect(start_y:Int, start_x:Int, end_x:Int, checked:Array<Null<Bool>>) {
+  function find_bounds_rect(start_y:Int, start_x:Int, end_x:Int, checked:Array<Null<Bool>>, layerName : String) {
 
     var index = -1;
     var tileID = -1;
@@ -244,7 +247,7 @@ class TiledLevel extends TiledMap{
 
         index = y * width + x;
 
-        tileID = tiledmap_data.layers[collision_layer_id].tiles[index].id;
+        tileID = tiledmap_data.layers[collision_layer_ids.get(layerName)].tiles[index].id;
 
         if(tileID == 0 || checked[index] == true){
 

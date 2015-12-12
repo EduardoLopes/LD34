@@ -7,6 +7,9 @@ import luxe.Screen;
 
 import luxe.Parcel;
 import luxe.ParcelProgress;
+import luxe.States;
+
+import states.Game;
 
 class Main extends luxe.Game {
 
@@ -19,8 +22,12 @@ class Main extends luxe.Game {
   public static var foregroundBatcher : phoenix.Batcher;
   public static var backgroundBatcherCamera : Camera;
   public static var foregroundBatcherCamera : Camera;
+  public static var types : Types;
+  public static var state: States;
 
   override function config(config:luxe.AppConfig) {
+
+    gameResolution = new Vector(config.window.width, config.window.height);
 
     return config;
 
@@ -31,9 +38,14 @@ class Main extends luxe.Game {
     var parcel = new Parcel({
       fonts : [],
       jsons : [],
-      texts : [],
-      textures : [],
-       sounds : []
+      texts : [
+        {id : 'assets/maps/test.tmx'}
+      ],
+      textures : [
+        {id : 'assets/images/collision-tile.png'},
+        {id : 'assets/images/tiles.png'}
+      ],
+      sounds : []
     });
 
     new ParcelProgress({
@@ -64,9 +76,18 @@ class Main extends luxe.Game {
       camera: foregroundBatcherCamera.view
     });
 
+    state = new States({ name:'state' });
+    state.add( new Game() );
+
+    parcel.load();
+
   } //ready
 
   function onLoaded(_){
+
+    types = new Types();
+
+    state.set('game');
 
   }
 
