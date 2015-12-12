@@ -24,6 +24,7 @@ class Main extends luxe.Game {
   public static var foregroundBatcherCamera : Camera;
   public static var types : Types;
   public static var state: States;
+  public static var materials : Materials;
 
   override function config(config:luxe.AppConfig) {
 
@@ -79,13 +80,14 @@ class Main extends luxe.Game {
     state = new States({ name:'state' });
     state.add( new Game() );
 
+    types = new Types();
+    materials = new Materials();
+
     parcel.load();
 
   } //ready
 
   function onLoaded(_){
-
-    types = new Types();
 
     state.set('game');
 

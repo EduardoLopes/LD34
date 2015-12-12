@@ -13,6 +13,7 @@ import nape.phys.BodyType;
 import nape.shape.Polygon;
 
 import objects.Background;
+import objects.Player;
 
 class Level extends TiledLevel{
 

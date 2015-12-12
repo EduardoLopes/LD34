@@ -6,6 +6,7 @@ class Types{
   public var Tilemap : CbType;
   public var Movable : CbType;
   public var OneWay : CbType;
+  public var Player : CbType;
 
   public function new(){
 
@@ -13,6 +14,7 @@ class Types{
     Tilemap = new CbType();
     Movable = new CbType();
     OneWay = new CbType();
+    Player = new CbType();
 
   }
 
