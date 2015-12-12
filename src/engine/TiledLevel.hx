@@ -257,7 +257,7 @@ class TiledLevel extends TiledMap{
               checked[index] = false;
           }
 
-          return new Polygon( Polygon.rect( start_x * tile_width, start_y * tile_height, (end_x - start_x) * tile_width, (y - start_y) * tile_height) );
+          return new Polygon( Polygon.rect( (start_x * tile_width) + pos.x, (start_y * tile_height) + pos.y, (end_x - start_x) * tile_width, (y - start_y) * tile_height) );
 
         }
 
@@ -266,7 +266,7 @@ class TiledLevel extends TiledMap{
       } //each x
     } //each y
 
-    return new Polygon( Polygon.rect(start_x * tile_width, start_y * tile_height, (end_x - start_x) * tile_width, (height - start_y) * tile_height) );
+    return new Polygon( Polygon.rect((start_x * tile_width) + pos.x, (start_y * tile_height) + pos.y, (end_x - start_x) * tile_width, (height - start_y) * tile_height) );
 
   } //find_bounds_rect
 

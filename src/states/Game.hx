@@ -26,7 +26,13 @@ class Game extends State {
   override function onenter<T>(_:T) {
 
     var res = Luxe.resources.text('assets/maps/test.tmx');
-    level = new Level({ tiled_file_data:res.asset.text, pos : new Vector(0,0), asset_path: 'assets/images' });
+
+    level = new Level({
+      tiled_file_data:res.asset.text,
+      pos : new Vector(0,Luxe.screen.h / 2),
+      asset_path: 'assets/images'
+    });
+
     level.display({ visible: true, scale:1 });
 
     connect_input();

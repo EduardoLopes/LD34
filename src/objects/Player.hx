@@ -51,7 +51,7 @@ class Player extends Sprite {
   public function new (object:TiledObject, level : Level){
 
     super({
-      pos: new Vector(object.pos.x, object.pos.y),
+      pos: new Vector(level.pos.x + object.pos.x, level.pos.y + object.pos.y),
       color: new Color().rgb(0xffffff),
       name: object.name,
       depth: 3.4,
