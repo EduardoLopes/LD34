@@ -5,6 +5,7 @@ import objects.Player;
 class Jump extends Walk {
 
   var jumps : Float = 1;
+  var jumpForce : Float = -300;
 
   public function new(Player:Player){
 
@@ -20,7 +21,7 @@ class Jump extends Walk {
 
     if(Luxe.input.inputpressed('jump') && jumps == 1 && player.onGround == false){
 
-      player.body.velocity.y = -200;
+      player.body.velocity.y = jumpForce;
       jumps--;
 
     }
@@ -37,7 +38,7 @@ class Jump extends Walk {
 
     jumps = 1;
     player.onGround = false;
-    player.body.velocity.y = -200;
+    player.body.velocity.y = jumpForce;
 
   }
 

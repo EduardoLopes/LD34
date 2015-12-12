@@ -41,7 +41,7 @@ class Player extends Sprite {
   public var moving : Bool;
   public var canMove: Bool;
   public var core : Shape;
-  public var walkForce : Float = 100;
+  public var walkForce : Float = 150;
 
   public var AirMaterial = new Material(0, 0, 1, 2);
   public var GroundMaterial = new Material(0, 3, 1, 2);

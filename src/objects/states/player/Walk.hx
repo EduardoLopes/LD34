@@ -21,11 +21,11 @@ class Walk extends ObjectState {
     super.update(dt);
 
     if(player.onRightWall){
-      player.walkForce = 100;
+      player.walkForce = 150;
     }
 
     if(player.onLeftWall){
-      player.walkForce = -100;
+      player.walkForce = -150;
     }
 
     player.body.velocity.x = player.walkForce;
