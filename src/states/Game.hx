@@ -19,6 +19,8 @@ class Game extends State {
 
   var level : Level;
   public static var drawer : DebugDraw;
+  public static var levels : Map<Int, Level>;
+  var IDLastLevelCreated : Int = 0;
 
   public function new() {
 
@@ -34,6 +36,8 @@ class Game extends State {
 
   override function onenter<T>(_:T) {
 
+    levels = new Map();
+
     var res = Luxe.resources.text('assets/maps/test.tmx');
 
     level = new Level({
@@ -44,15 +48,17 @@ class Game extends State {
 
     level.display({ visible: true, scale:1 });
 
-    var res2 = Luxe.resources.text('assets/maps/test2.tmx');
+    for(y in 0...Math.floor(Luxe.screen.h / 80) + 1 ){
 
-    var level2 = new Level({
-      tiled_file_data: res2.asset.text,
-      pos : new Vector(0,(Luxe.screen.h / 2) - 80),
-      asset_path: 'assets/images'
+      create_level(y);
+
+    }
+
+    Luxe.events.listen('create_one_level', function(_){
+
+      create_level(IDLastLevelCreated + 1);
+
     });
-
-    level2.display({ visible: true, scale:1 });
 
     connect_input();
 
@@ -65,6 +71,25 @@ class Game extends State {
       /*pure*/ true
     ));
 
+    enable();
+
+  }
+
+  function create_level(y:Int){
+
+    var res = Luxe.resources.text('assets/maps/test2.tmx');
+
+    var level = new Level({
+      tiled_file_data: res.asset.text,
+      pos : new Vector(0, (level.height * 16) - y * 80),
+      asset_path: 'assets/images'
+    });
+
+    levels.set(y, level);
+
+    level.display({ visible: true, scale:1 });
+
+    IDLastLevelCreated = y;
 
   }
 
@@ -89,6 +114,19 @@ class Game extends State {
     Luxe.input.bind_gamepad('jump', 2);
 
   }
+
+  override function update(dt:Float){
+
+    for(level in levels){
+
+      if(level.pos != null){
+        level.update(dt);
+      }
+
+    }
+
+  }
+
 
   override function onleave<T>(_:T) {
 

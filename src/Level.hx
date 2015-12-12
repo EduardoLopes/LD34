@@ -21,6 +21,7 @@ class Level extends TiledLevel{
 
   var body : Body;
   var entities : Map<String, engine.Sprite>;
+  var level_ID : Int = 0;
 
   public function new(options:TiledMapOptions){
 
@@ -53,8 +54,12 @@ class Level extends TiledLevel{
       entity.onObjectsLoaded();
     }
 
-    Game.drawer.add(body);
+    //Game.drawer.add(body);
 
+  }
+
+  public function setID(ID : Int){
+    level_ID = ID;
   }
 
   function loadObjects(){
@@ -72,6 +77,20 @@ class Level extends TiledLevel{
       var background = new Background(layer, this);
       entities.set(background.name, background);
 
+    }
+
+  }
+
+  public function update(dt:Float){
+
+    if(pos.y > Luxe.camera.pos.y + Luxe.screen.h){
+      display({ visible: false, scale:1 });
+      clear_quadPackGeometry();
+      destroy(true);
+      Game.levels.remove(level_ID);
+      body.space = null;
+      body = null;
+      Luxe.events.fire('create_one_level');
     }
 
   }
