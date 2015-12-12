@@ -3,7 +3,7 @@ package components;
 import luxe.Component;
 
 import luxe.Vector;
-import luxe.Entity;
+import objects.Player;
 import luxe.tween.Actuate;
 
 import luxe.Camera;
@@ -12,14 +12,13 @@ import luxe.Rectangle;
 
 class CameraFollower extends Component {
 
-  public var follower : Entity;
+  public var follower : Player;
   var camera : Camera;
   var screenSize : Vector;
   var screenMiddle : Vector;
-  var bounds : Rectangle;
   var tweenComplete : Bool;
-  var tweenTarget:Vector;
   var zoom : Vector;
+  var currentPositionNormal : Vector;
 
   override function init() {
 
@@ -28,11 +27,9 @@ class CameraFollower extends Component {
     zoom = new Vector(0, 0);
     screenSize = new Vector(0, 0);
     screenMiddle = new Vector(0, 0);
+    currentPositionNormal = new Vector();
     onWindowResized();
     follower = null;
-
-    tweenTarget = new Vector(0, 0);
-    bounds = new Rectangle(0, 0, 0, 0);
 
     tweenComplete = true;
 
@@ -47,99 +44,26 @@ class CameraFollower extends Component {
 
   }
 
-  public function setFollower(Follower : Entity){
+  public function setFollower(Follower : Player){
     follower = Follower;
-
-    camera.pos.x = follower.pos.x - screenMiddle.x;
-    camera.pos.y = follower.pos.y - screenMiddle.y;
   }
 
-  function distance(a:Vector, b:Vector) {
-    return Math.sqrt(Math.pow( a.x - b.x, 2) + Math.pow( a.y - b.y, 2));
-  };
+  override function update(dt:Float):Void {
 
-  public function setBounds(x, y, w, h, tween){
+    if(follower == null) return null;
 
-    bounds.set(x, y, w, h);
+    var normal = Math.floor(follower.pos.y / 80);
 
-    tweenComplete = !tween;
+    if(normal != currentPositionNormal.y && follower.onGround){
 
-    if(tween == true){
-
-      tweenTarget.x = limit_x_bounds();
-      tweenTarget.y = limit_y_bounds();
-
-      var dist = distance(camera.pos, tweenTarget);
-
-      dist = Math.min(1, (dist / 80));
-
-      Actuate.tween(camera.pos, 0.8 * dist, {x: tweenTarget.x, y: tweenTarget.y} )
+      Actuate.tween(camera.pos, 0.5, {y: (normal * 80) - screenMiddle.y + 20} )
       .ease(luxe.tween.easing.Expo.easeOut)
       .onComplete(function(){
         tweenComplete = true;
       })
       .snapping( true );
 
-    }
-
-  }
-
-  function limit_x_bounds(){
-
-    var bounds_x = bounds.x + camera.get('shaker').offset.x;
-    var bounds_w = bounds.w + camera.get('shaker').offset.x;
-
-    return Math.floor(
-      Math.max(
-        bounds_x - (screenSize.x / 2),
-        Math.min(
-          camera.pos.x,
-          ( bounds_w ) - (screenSize.x / 2) - Main.gameResolution.x
-        )
-      )
-    );
-
-  }
-
-  function limit_y_bounds(){
-
-    var bounds_y = bounds.y + camera.get('shaker').offset.y;
-    var bounds_h = bounds.h + camera.get('shaker').offset.y;
-
-    return Math.floor(
-      Math.max(
-        bounds_y - (screenSize.y / 2),
-        Math.min(
-          camera.pos.y,
-          ( bounds_h ) - (screenSize.y / 2) - Main.gameResolution.y
-        )
-      )
-    );
-
-  }
-
-  override function update(dt:Float) {
-
-    if(follower != null){
-
-      if(tweenComplete == true){
-
-        if(follower.onGround || follower.dashing == true){
-          camera.pos.x += ((follower.pos.x - screenMiddle.x) - camera.pos.x) * 0.08;
-        }
-
-        if(follower.onGround){
-          camera.pos.y += ((follower.pos.y - screenMiddle.y) - camera.pos.y) * 0.08;
-        }
-
-      }
-
-    }
-
-    if((bounds.w != 0 || bounds.h != 0) && tweenComplete == true){
-
-      camera.pos.x = limit_x_bounds();
-      camera.pos.y = limit_y_bounds();
+      currentPositionNormal.y = normal;
 
     }
 

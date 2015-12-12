@@ -77,6 +77,8 @@ class Player extends Sprite {
     body = physics.body;
     core = physics.core;
 
+    Luxe.camera.get('follower').setFollower(this);
+
     add( new TouchingChecker(Main.types.Player, Main.types.Floor) );
 
     events.listen('onBottom', function(_){

@@ -9,6 +9,8 @@ import luxe.Parcel;
 import luxe.ParcelProgress;
 import luxe.States;
 
+import components.CameraFollower;
+
 import states.Game;
 
 class Main extends luxe.Game {
@@ -83,6 +85,8 @@ class Main extends luxe.Game {
 
     types = new Types();
     materials = new Materials();
+
+    Luxe.camera.add(new CameraFollower({name: 'follower'}));
 
     parcel.load();
 
