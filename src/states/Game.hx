@@ -12,14 +12,23 @@ import nape.callbacks.PreCallback;
 import nape.callbacks.PreFlag;
 import nape.callbacks.PreListener;
 
+import luxe.physics.nape.DebugDraw;
+
 
 class Game extends State {
 
   var level : Level;
+  public static var drawer : DebugDraw;
 
   public function new() {
 
     super({ name:'game' });
+
+    drawer = new DebugDraw({
+      depth: 100
+    });
+    Luxe.physics.nape.debugdraw = drawer;
+    Luxe.physics.nape.draw = true;
 
   }
 
@@ -34,6 +43,16 @@ class Game extends State {
     });
 
     level.display({ visible: true, scale:1 });
+
+    var res2 = Luxe.resources.text('assets/maps/test2.tmx');
+
+    var level2 = new Level({
+      tiled_file_data: res2.asset.text,
+      pos : new Vector(0,(Luxe.screen.h / 2) - 80),
+      asset_path: 'assets/images'
+    });
+
+    level2.display({ visible: true, scale:1 });
 
     connect_input();
 
@@ -51,11 +70,13 @@ class Game extends State {
 
   function oneWayCollision(cb:PreCallback):PreFlag {
 
-    if(cb.arbiter.collisionArbiter.normal.y == 1){
-      return PreFlag.IGNORE;
-    }
+    var colArb = cb.arbiter.collisionArbiter;
 
-    return PreFlag.ACCEPT_ONCE;
+    if ((colArb.normal.y > 0) != cb.swapped) {
+        return PreFlag.IGNORE;
+    } else {
+        return PreFlag.ACCEPT;
+    }
 
   }
 

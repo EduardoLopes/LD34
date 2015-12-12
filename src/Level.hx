@@ -15,10 +15,12 @@ import nape.shape.Polygon;
 import objects.Background;
 import objects.Player;
 
+import states.Game;
+
 class Level extends TiledLevel{
 
   var body : Body;
-  public var entities : Map<String, engine.Sprite>;
+  var entities : Map<String, engine.Sprite>;
 
   public function new(options:TiledMapOptions){
 
@@ -31,15 +33,17 @@ class Level extends TiledLevel{
     body.cbTypes.add(Main.types.Floor);
 
     var collision_polygons = collision_bounds_fitted('collision');
-    for(polygon in collision_polygons) {
-      body.shapes.add( polygon );
+    for(polygon_1 in collision_polygons) {
+      body.shapes.add( polygon_1 );
     }
 
     var one_way_polygons = collision_bounds_fitted('one_way_plataforms');
-    for(polygon in one_way_polygons) {
-      polygon.cbTypes.add(Main.types.OneWay);
-      body.shapes.add( polygon );
+    for(polygon_2 in one_way_polygons) {
+      polygon_2.cbTypes.add(Main.types.OneWay);
+      body.shapes.add( polygon_2 );
     }
+
+    body.userData.name = 'tilemap ' + pos.x + '/' + pos.y;
 
     body.space = Luxe.physics.nape.space;
 
@@ -48,6 +52,8 @@ class Level extends TiledLevel{
     for( entity in entities ){
       entity.onObjectsLoaded();
     }
+
+    Game.drawer.add(body);
 
   }
 

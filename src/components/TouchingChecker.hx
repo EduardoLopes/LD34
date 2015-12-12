@@ -5,10 +5,14 @@ import luxe.Component;
 import nape.callbacks.CbEvent;
 import nape.callbacks.InteractionCallback;
 import nape.callbacks.InteractionListener;
-import nape.callbacks.InteractionType;
 import nape.callbacks.CbType;
 import nape.dynamics.ArbiterList;
+
+import nape.callbacks.InteractionType;
+import nape.callbacks.PreCallback;
 import nape.callbacks.PreFlag;
+import nape.callbacks.PreListener;
+import nape.dynamics.Arbiter;
 
 @:enum abstract Touching(Int) from Int to Int{
   var NONE    = 0;
@@ -37,6 +41,7 @@ class TouchingChecker extends Component {
   var colladingEvent:String;
   var touching:Touching;
   var wasTouching:Touching;
+  var swapped:Bool = false;
   /*
       InteractionListener callback is not called in some frames,
       this function helpes figure out if i was called or not
@@ -56,6 +61,15 @@ class TouchingChecker extends Component {
 
     object = cast entity;
 
+    Luxe.physics.nape.space.listeners.add(new PreListener(
+      InteractionType.COLLISION,
+      objectType1,
+      objectType2,
+      preOnGoing,
+      /*precedence*/ 0,
+      /*pure*/ true
+    ));
+
     Luxe.physics.nape.space.listeners.add(new InteractionListener(
       CbEvent.ONGOING, InteractionType.COLLISION,
       objectType1,
@@ -72,17 +86,59 @@ class TouchingChecker extends Component {
 
   }
 
-  function checkContacts(arbiters:ArbiterList){
+  function preOnGoing(cb:PreCallback):PreFlag {
+
+    swapped = cb.swapped;
+
+    return cb.arbiter.collisionArbiter.state;
+
+  }
+
+
+  function checkAbriter(arbiter:Arbiter):Void{
+
+    var colArb = arbiter.collisionArbiter;
+    var body1 = colArb.body1;
+    var body2 = colArb.body2;
+    var arbiters;
+
+    if(swapped){
+      arbiters = body2.arbiters;
+    } else {
+      arbiters = body1.arbiters;
+    }
 
     arbiters.foreach(function (obj):Void {
 
       if(obj.state == PreFlag.IGNORE || obj.state == PreFlag.IGNORE_ONCE) return null;
 
-      if(obj.collisionArbiter.normal.y == 1) touching |= Touching.TOP;
-      if(obj.collisionArbiter.normal.x == 1) touching |= Touching.RIGHT;
+      if(!swapped){
 
-      if(obj.collisionArbiter.normal.y == -1) touching |= Touching.BOTTOM;
-      if(obj.collisionArbiter.normal.x == -1) touching |= Touching.LEFT;
+        if(obj.collisionArbiter.normal.y == 1) touching |= Touching.BOTTOM;
+        if(obj.collisionArbiter.normal.x == 1) touching |= Touching.LEFT;
+
+        if(obj.collisionArbiter.normal.y == -1) touching |= Touching.TOP;
+        if(obj.collisionArbiter.normal.x == -1) touching |= Touching.RIGHT;
+
+      } else {
+
+        if(obj.collisionArbiter.normal.y == 1) touching |= Touching.TOP;
+        if(obj.collisionArbiter.normal.x == 1) touching |= Touching.RIGHT;
+
+        if(obj.collisionArbiter.normal.y == -1) touching |= Touching.BOTTOM;
+        if(obj.collisionArbiter.normal.x == -1) touching |= Touching.LEFT;
+
+      }
+
+    });
+
+  }
+
+  function checkContacts(arbiters:ArbiterList){
+
+    arbiters.foreach(function (obj):Void {
+
+      checkAbriter(obj);
 
     });
 
@@ -151,12 +207,16 @@ class TouchingChecker extends Component {
 
     }
 
+    object.events.fire('onGoing_'+rightWallEvent);
+
     if( leftWallEvent != lastLeftWallEvent ){
 
       object.events.fire(leftWallEvent);
       lastLeftWallEvent = leftWallEvent;
 
     }
+
+    object.events.fire('onGoing_'+leftWallEvent);
 
     if( wallEvent != lastWallEvent ){
 
@@ -165,6 +225,8 @@ class TouchingChecker extends Component {
 
     }
 
+    object.events.fire('onGoing_'+wallEvent);
+
     if( groundEvent != lastGroundEvent ){
 
       object.events.fire(groundEvent);
@@ -172,12 +234,16 @@ class TouchingChecker extends Component {
 
     }
 
+    object.events.fire('onGoing_'+groundEvent);
+
     if( colladingEvent != lastColladingEvent ){
 
       object.events.fire(colladingEvent);
       lastColladingEvent = colladingEvent;
 
     }
+
+    object.events.fire('onGoing_'+colladingEvent);
 
     //clean up collision index
     wasTouching = touching;

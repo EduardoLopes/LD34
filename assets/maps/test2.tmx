@@ -33,7 +33,5 @@
 0,66,66,66,66,66,66,66,66,66,66,66,66,66,0
 </data>
  </layer>
- <objectgroup name="Object Layer 1">
-  <object id="2" name="player" type="Player" x="160" y="32" width="16" height="16"/>
- </objectgroup>
+ <objectgroup name="Object Layer 1"/>
 </map>
