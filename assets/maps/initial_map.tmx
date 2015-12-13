@@ -7,31 +7,19 @@
   <image source="../images/collision-tile.png" width="32" height="16"/>
  </tileset>
  <layer name="Tile Layer 1" width="15" height="5">
-  <data encoding="csv">
-1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
-1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
-1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
-1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
-1,2,2,2,2,2,2,2,2,2,2,2,2,2,1
-</data>
+  <data encoding="base64" compression="zlib">
+   eJxjZCAPMELxUNTLRAYG6QMAClwAJQ==
+  </data>
  </layer>
  <layer name="collision" width="15" height="5" opacity="0.4">
-  <data encoding="csv">
-65,0,0,0,0,0,0,0,0,0,0,0,0,0,65,
-65,0,0,0,0,0,0,0,0,0,0,0,0,0,65,
-65,0,0,0,0,0,0,0,0,0,0,0,0,0,65,
-65,0,0,0,0,0,0,0,0,0,0,0,0,0,65,
-65,0,0,0,0,0,0,0,0,0,0,0,0,0,65
-</data>
+  <data encoding="base64" compression="zlib">
+   eJxzZCAPOELxSNILAIMrAos=
+  </data>
  </layer>
  <layer name="one_way_plataforms" width="15" height="5" opacity="0.4">
-  <data encoding="csv">
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,66,66,66,66,66,66,66,66,66,66,66,66,66,0
-</data>
+  <data encoding="base64" compression="zlib">
+   eJxjYBh5wIkMDAIAbGwDWw==
+  </data>
  </layer>
  <objectgroup name="Object Layer 1">
   <object id="2" name="player" type="Player" x="160" y="32" width="16" height="16"/>
