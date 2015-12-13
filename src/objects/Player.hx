@@ -121,7 +121,21 @@ class Player extends Sprite {
 
   }
 
-  override function ondestroy(){
+  override public function ondestroy(){
+
+    if(this.geometry != null) this.geometry.drop(true);
+    super.ondestroy();
+
+    visible = false;
+    active = false;
+
+    if(body != null){
+      Luxe.physics.nape.space.bodies.remove(body);
+    }
+    body = null;
+    core = null;
+
+    remove('ground_checker');
 
     events.unlisten('onBottom');
     events.unlisten('offBottom');
@@ -130,8 +144,6 @@ class Player extends Sprite {
     events.unlisten('offLeft');
     events.unlisten('onRight');
     events.unlisten('offRight');
-
-    remove('ground_checker');
 
   }
 

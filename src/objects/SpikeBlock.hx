@@ -58,9 +58,18 @@ class SpikeBlock extends engine.Sprite {
 
   }
 
-  override function ondestroy(){
+  override public function ondestroy(){
 
+    if(this.geometry != null) this.geometry.drop(true);
+    super.ondestroy();
 
+    visible = false;
+    active = false;
+    if(body != null){
+      Luxe.physics.nape.space.bodies.remove( body );
+    }
+    body = null;
+    core = null;
 
   }
 

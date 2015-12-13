@@ -113,8 +113,14 @@ class Game extends State {
 
   function connect_input() {
 
+    Luxe.input.bind_key('jump', Key.key_k);
+    Luxe.input.bind_key('shoot', Key.key_l);
+
     Luxe.input.bind_key('jump', Key.key_z);
-    Luxe.input.bind_key('shoot', Key.key_k);
+    Luxe.input.bind_key('shoot', Key.key_x);
+
+    Luxe.input.bind_key('jump', Key.key_a);
+    Luxe.input.bind_key('shoot', Key.key_s);
 
     Luxe.input.bind_gamepad('shoot', 3);
     Luxe.input.bind_gamepad('jump', 2);
@@ -142,10 +148,11 @@ class Game extends State {
     for(level in levels){
       if(level != null){
         level.clear();
+        level = null;
       }
     }
 
-    //Luxe.scene.empty();
+    Luxe.scene.empty();
     Luxe.renderer.batcher.empty();
     //Luxe.scene.add(Luxe.camera);
 
