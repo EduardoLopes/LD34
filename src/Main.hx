@@ -31,6 +31,7 @@ class Main extends luxe.Game {
   public static var state: States;
   public static var materials : Materials;
 
+
   override function config(config:luxe.AppConfig) {
 
     gameResolution = new Vector(config.window.width, config.window.height);
@@ -85,6 +86,8 @@ class Main extends luxe.Game {
         {id : 'assets/images/spike_block.png'},
         {id : 'assets/images/laser_sides.png'},
         {id : 'assets/images/laser_up.png'},
+        {id : 'assets/images/background_1.png'},
+        {id : 'assets/images/background_2.png'},
         {id : 'assets/images/player.png'}
       ],
       sounds : []

@@ -13,7 +13,9 @@ import nape.callbacks.PreFlag;
 import nape.callbacks.PreListener;
 
 import luxe.physics.nape.DebugDraw;
+import components.CameraFollower;
 
+import phoenix.Texture.ClampType;
 
 class Game extends State {
 
@@ -21,6 +23,8 @@ class Game extends State {
   public static var drawer : DebugDraw;
   public static var levels : Map<Int, Level>;
   var IDLastLevelCreated : Int = 0;
+  var background_1 : luxe.Sprite;
+  var background_2 : luxe.Sprite;
 
   public function new() {
 
@@ -74,6 +78,34 @@ class Game extends State {
     enable();
 
     Luxe.camera.get('follower').resetCamera();
+
+    background_1 = new luxe.Sprite({
+      name: 'background_1',
+      batcher: Main.backgroundBatcher,
+      depth: 2,
+      pos: new Vector(0, 0),
+      size: new Vector(Main.gameResolution.x, Main.gameResolution.y),
+      texture: Luxe.resources.texture('assets/images/background_1.png')
+    });
+
+    background_2 = new luxe.Sprite({
+      name: 'background_2',
+      batcher: Main.backgroundBatcher,
+      depth: 1,
+      pos: new Vector(0, 0),
+      size: new Vector(Main.gameResolution.x, Main.gameResolution.y),
+      texture: Luxe.resources.texture('assets/images/background_2.png')
+    });
+
+    background_1.texture.clamp_t = ClampType.repeat;
+    background_1.texture.clamp_s = ClampType.repeat;
+    background_2.texture.clamp_t = ClampType.repeat;
+    background_2.texture.clamp_s = ClampType.repeat;
+
+    Main.backgroundBatcherCamera.pos.x = -(CameraFollower.screenMiddle.x);
+    Main.backgroundBatcherCamera.pos.y = -(CameraFollower.screenMiddle.y);
+    Main.foregroundBatcherCamera.pos.x = -(CameraFollower.screenMiddle.x);
+    Main.foregroundBatcherCamera.pos.y = -(CameraFollower.screenMiddle.y);
 
   }
 
@@ -129,6 +161,11 @@ class Game extends State {
 
   override function update(dt:Float){
 
+    background_1.uv.x = (Luxe.camera.pos.x) * 0.8;
+    background_1.uv.y = (Luxe.camera.pos.y) * 0.8;
+    background_2.uv.x = (Luxe.camera.pos.x) * 0.4;
+    background_2.uv.y = (Luxe.camera.pos.y) * 0.4;
+
     for(level in levels){
 
       if(level.pos != null){
@@ -144,6 +181,11 @@ class Game extends State {
     level.clear();
     level = null;
     IDLastLevelCreated = 0;
+
+    background_1.destroy();
+    background_1 = null;
+    background_2.destroy();
+    background_2 = null;
 
     for(level in levels){
       if(level != null){

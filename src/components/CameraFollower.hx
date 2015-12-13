@@ -15,7 +15,7 @@ class CameraFollower extends Component {
   public var follower : Player;
   var camera : Camera;
   public static var cameraOffset : Vector;
-  var screenMiddle : Vector;
+  public static var screenMiddle : Vector;
   public static var tweenComplete;
   var zoom : Vector;
   var currentPositionNormal : Vector;
@@ -44,6 +44,11 @@ class CameraFollower extends Component {
 
     camera.pos.x = -(cameraOffset.x / 2);
     camera.pos.y =  (currentPositionNormal.y * 80) - screenMiddle.y;
+
+    Main.backgroundBatcherCamera.pos.x = -(CameraFollower.screenMiddle.x);
+    Main.backgroundBatcherCamera.pos.y = -(CameraFollower.screenMiddle.y);
+    Main.foregroundBatcherCamera.pos.x = -(CameraFollower.screenMiddle.x);
+    Main.foregroundBatcherCamera.pos.y = -(CameraFollower.screenMiddle.y);
 
   }
 
