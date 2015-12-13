@@ -16,7 +16,7 @@ class CameraFollower extends Component {
   var camera : Camera;
   var screenSize : Vector;
   var screenMiddle : Vector;
-  var tweenComplete : Bool;
+  public static var tweenComplete;
   var zoom : Vector;
   var currentPositionNormal : Vector;
 
@@ -40,7 +40,10 @@ class CameraFollower extends Component {
     var zoom:Float = Math.max(0, Main.zoom - 1);
 
     screenSize.set_xy(240 * zoom, 135 * zoom);
-    screenMiddle.set_xy(((Main.gameResolution.x * (zoom + 1)) / 2), ((Main.gameResolution.y * (zoom + 1)) / 2));
+    screenMiddle.set_xy((Main.gameResolution.x * Main.zoom) / 2, (Main.gameResolution.y * Main.zoom) / 2);
+
+    camera.pos.x = -(screenSize.x / 2);
+    camera.pos.y = (currentPositionNormal.y * 80) - screenMiddle.y - (screenSize.y / 2) + 12;
 
   }
 
@@ -56,8 +59,8 @@ class CameraFollower extends Component {
 
     if(normal != currentPositionNormal.y && follower.onGround){
 
-      Actuate.tween(camera.pos, 0.5, {y: (normal * 80) - screenMiddle.y + 20} )
-      .ease(luxe.tween.easing.Expo.easeOut)
+      Actuate.tween(camera.pos, 0.5, {y: (normal * 80) - screenMiddle.y - (screenSize.y / 2) + 12} )
+      .ease(luxe.tween.easing.Quad.easeInOut)
       .onComplete(function(){
         tweenComplete = true;
       })

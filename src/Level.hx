@@ -16,6 +16,7 @@ import objects.Background;
 import objects.Player;
 
 import states.Game;
+import components.CameraFollower;
 
 class Level extends TiledLevel{
 
@@ -83,7 +84,7 @@ class Level extends TiledLevel{
 
   public function update(dt:Float){
 
-    if(pos.y > Luxe.camera.pos.y + Luxe.screen.h){
+    if(pos.y < Luxe.camera.pos.y + Main.gameResolution.y && CameraFollower.tweenComplete == true){
       display({ visible: false, scale:1 });
       clear_quadPackGeometry();
       destroy(true);

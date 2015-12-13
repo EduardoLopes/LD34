@@ -146,6 +146,8 @@ class Main extends luxe.Game {
     backgroundBatcherCamera.viewport.set(x, y, width, height);
     foregroundBatcherCamera.viewport.set(x, y, width, height);
 
+    Luxe.camera.get('follower').onWindowResized();
+
   }
 
   override function onkeyup( e:KeyEvent ) {
