@@ -23,6 +23,10 @@ class Walk extends Move {
 
     }
 
+    if(Luxe.input.inputpressed('shoot')){
+      player.laser.shoot();
+    }
+
   }
 
 }

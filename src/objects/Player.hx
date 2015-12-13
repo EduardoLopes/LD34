@@ -49,7 +49,7 @@ class Player extends Sprite {
 
   public var states : StateMachine;
 
-  var laser : Laser;
+  public var laser : Laser;
 
   public function new (object:TiledObject, level : Level){
 

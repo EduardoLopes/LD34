@@ -33,6 +33,11 @@ class Laser extends engine.Sprite {
   public var physics : BodySetup;
   public var core : Shape;
 
+  public var shotTime:Float = 0.2;
+  public var shotTimer:Float = 0.2;
+  public var killTime:Float = 0.08;
+  public var killTimer:Float = 0;
+
   function new (x:Float, y:Float){
 
     super({
@@ -43,6 +48,8 @@ class Laser extends engine.Sprite {
       color: new Color().rgb(0xe0f038),
       depth: 3
     });
+
+    visible = false;
 
 /*  states = new StateMachine();
     states.add( new Jump( this ) );
@@ -65,19 +72,36 @@ class Laser extends engine.Sprite {
     body.position.y = pos.y;
 
     Luxe.physics.nape.space.listeners.add(new InteractionListener(
-      CbEvent.BEGIN, InteractionType.SENSOR,
+      CbEvent.ONGOING, InteractionType.SENSOR,
       Main.types.Laser,
       Main.types.Block,
       laserSensor
     ));
 
-    Game.drawer.add(body);
-
   }
 
   function laserSensor(cb:InteractionCallback){
 
-    cb.int2.userData.kill();
+    if(killTimer > 0){
+      cb.int2.userData.kill();
+    };
+
+  }
+
+  public function shoot(){
+
+    if(shotTimer <= 0){
+
+      shotTimer = shotTime;
+      killTimer = killTime;
+
+      visible = true;
+
+      Luxe.timer.schedule(0.1, function(){
+        visible = false;
+      });
+
+    }
 
   }
 
@@ -106,6 +130,9 @@ class Laser extends engine.Sprite {
     pos.y = body.position.y;
 
     pos = pos.int();
+
+    shotTimer -= dt;
+    killTimer -= dt;
 
   }
 
