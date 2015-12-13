@@ -59,6 +59,8 @@ class SpikeBlock extends engine.Sprite {
     body = physics.body;
     core = physics.core;
 
+    body.userData.kill = kill;
+
     body.position.x = pos.x;
     body.position.y = pos.y;
 
@@ -74,7 +76,13 @@ class SpikeBlock extends engine.Sprite {
       states.set( object.properties.get('state') );
     }
 
+
+
   }
+
+  public function kill(){
+    destroy();
+  };
 
   override public function ondestroy(){
 

@@ -39,7 +39,7 @@ class Laser extends engine.Sprite {
       name: 'LASER',
       name_unique: true,
       pos: new Vector(x + 8, y + 8),
-      size: new Vector(144, 16),
+      size: new Vector(144, 12),
       color: new Color().rgb(0xe0f038),
       depth: 3
     });
@@ -77,7 +77,7 @@ class Laser extends engine.Sprite {
 
   function laserSensor(cb:InteractionCallback){
 
-    trace('sensor');
+    cb.int2.userData.kill();
 
   }
 
