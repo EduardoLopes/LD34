@@ -37,6 +37,7 @@ class LaserUp extends engine.Sprite {
   public var shotTimer:Float = 0.2;
   public var killTime:Float = 0.08;
   public var killTimer:Float = 0;
+  public var anim : SpriteAnimation;
 
   function new (x:Float, y:Float){
 
@@ -45,8 +46,8 @@ class LaserUp extends engine.Sprite {
       name_unique: true,
       pos: new Vector(x, y),
       size: new Vector(12, 96),
-      color: new Color().rgb(0xe0f038),
-      depth: 3
+      depth: 3,
+      texture: Luxe.resources.texture('assets/images/laser_up.png')
     });
 
     visible = false;
@@ -78,6 +79,17 @@ class LaserUp extends engine.Sprite {
       laserSensor
     ));
 
+    var anim_object = Luxe.resources.json('assets/jsons/laser_up_animation.json');
+
+    anim = add( new SpriteAnimation({ name:'anim' }) );
+    anim.add_from_json_object( anim_object.asset.json );
+
+    events.listen('animation.shoot.end', function(_){
+
+      visible = false;
+
+    });
+
   }
 
   function laserSensor(cb:InteractionCallback){
@@ -96,7 +108,10 @@ class LaserUp extends engine.Sprite {
     pos = pos.int();
 
 
-    if(shotTimer <= 0){
+    if(shotTimer <= 0 && visible == false){
+
+      anim.animation = 'shoot';
+      anim.play();
 
       shotTimer = shotTime;
       killTimer = killTime;
@@ -122,6 +137,7 @@ class LaserUp extends engine.Sprite {
     if(body != null){
       Luxe.physics.nape.space.bodies.remove( body );
     }
+
     body = null;
     core = null;
 

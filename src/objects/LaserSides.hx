@@ -47,7 +47,7 @@ class LaserSides extends engine.Sprite {
       pos: new Vector(x, y),
       size: new Vector(144, 12),
       depth: 3,
-      texture: Luxe.resources.texture('assets/images/laser_sides.png'),
+      texture: Luxe.resources.texture('assets/images/laser_sides.png')
     });
 
 

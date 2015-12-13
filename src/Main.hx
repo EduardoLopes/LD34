@@ -43,6 +43,7 @@ class Main extends luxe.Game {
       jsons : [
         { id : 'assets/jsons/block_spike_animation.json' },
         { id : 'assets/jsons/laser_sides_animation.json' },
+        { id : 'assets/jsons/laser_up_animation.json' },
         { id : 'assets/jsons/player_animation.json' }
       ],
       texts : [
@@ -80,6 +81,7 @@ class Main extends luxe.Game {
         {id : 'assets/images/tiles.png'},
         {id : 'assets/images/spike_block.png'},
         {id : 'assets/images/laser_sides.png'},
+        {id : 'assets/images/laser_up.png'},
         {id : 'assets/images/player.png'}
       ],
       sounds : []
