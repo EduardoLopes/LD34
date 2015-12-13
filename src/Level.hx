@@ -84,7 +84,7 @@ class Level extends TiledLevel{
 
   public function update(dt:Float){
 
-    if(pos.y < Luxe.camera.pos.y + Main.gameResolution.y && CameraFollower.tweenComplete == true){
+    if(pos.y > Luxe.camera.pos.y + Main.gameResolution.y + (CameraFollower.cameraOffset.y / 2)){
       display({ visible: false, scale:1 });
       clear_quadPackGeometry();
       destroy(true);
