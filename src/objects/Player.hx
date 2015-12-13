@@ -79,39 +79,39 @@ class Player extends Sprite {
 
     Luxe.camera.get('follower').setFollower(this);
 
-    add( new TouchingChecker(Main.types.Player, Main.types.Floor) );
+    add( new TouchingChecker('player-floor', Main.types.Player, Main.types.Floor) );
 
-    events.listen('onBottom', function(_){
+    events.listen('player-floor_onBottom', function(_){
       onGround = true;
       body.setShapeMaterials(Materials.Ground);
     });
 
-    events.listen('offBottom', function(_){
+    events.listen('player-floor_offBottom', function(_){
       onGround = false;
       body.setShapeMaterials(Materials.Air);
     });
 
-    events.listen('onSide', function(_){
+    events.listen('player-floor_onSide', function(_){
       onWall = true;
     });
 
-    events.listen('offSide', function(_){
+    events.listen('player-floor_offSide', function(_){
       onWall = false;
     });
 
-    events.listen('onLeft', function(_){
+    events.listen('player-floor_onLeft', function(_){
       onLeftWall = true;
     });
 
-    events.listen('offLeft', function(_){
+    events.listen('player-floor_offLeft', function(_){
       onLeftWall = false;
     });
 
-    events.listen('onRight', function(_){
+    events.listen('player-floor_onRight', function(_){
       onRightWall = true;
     });
 
-    events.listen('offRight', function(_){
+    events.listen('player-floor_offRight', function(_){
       onRightWall = false;
     });
 
@@ -124,6 +124,11 @@ class Player extends Sprite {
   override public function ondestroy(){
 
     if(this.geometry != null) this.geometry.drop(true);
+
+    if(has('player-floor')){
+      remove('player-floor');
+    }
+
     super.ondestroy();
 
     visible = false;
@@ -135,15 +140,14 @@ class Player extends Sprite {
     body = null;
     core = null;
 
-    remove('ground_checker');
-
-    events.unlisten('onBottom');
-    events.unlisten('offBottom');
-    events.unlisten('onSide');
-    events.unlisten('offSide');
-    events.unlisten('offLeft');
-    events.unlisten('onRight');
-    events.unlisten('offRight');
+    events.unlisten('player-floor_onBottom');
+    events.unlisten('player-floor_offBottom');
+    events.unlisten('player-floor_onSide');
+    events.unlisten('player-floor_offSide');
+    events.unlisten('player-floor_onLeft');
+    events.unlisten('player-floor_offLeft');
+    events.unlisten('player-floor_onRight');
+    events.unlisten('player-floor_offRight');
 
   }
 

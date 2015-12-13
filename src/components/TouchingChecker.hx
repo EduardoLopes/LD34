@@ -48,9 +48,9 @@ class TouchingChecker extends Component {
   */
   var touchingFunctionUpdated:Bool = false;
 
-  public function new(ObjectType1 : CbType, ObjectType2 : CbType){
+  public function new(componentName:String, ObjectType1 : CbType, ObjectType2 : CbType){
 
-    super({name: 'ground_checker'});
+    super({name: componentName});
 
     objectType1 = ObjectType1;
     objectType2 = ObjectType2;
@@ -172,32 +172,32 @@ class TouchingChecker extends Component {
 
   override function update(dt:Float):Void{
 
-    if(touchingFunctionUpdated == false) return null;
+    if(touchingFunctionUpdated == false || object == null) return null;
 
-    rightWallEvent = 'offRight';
-    leftWallEvent = 'offLeft';
-    wallEvent = 'offSide';
-    groundEvent = 'offBottom';
-    colladingEvent = 'wasCollading';
+    rightWallEvent = name+'_offRight';
+    leftWallEvent = name+'_offLeft';
+    wallEvent = name+'_offSide';
+    groundEvent = name+'_offBottom';
+    colladingEvent = name+'_wasCollading';
 
     if( isTouching(Touching.RIGHT) ){
-      rightWallEvent = 'onRight';
+      rightWallEvent = name+'_onRight';
     }
 
     if( isTouching(Touching.LEFT)  ){
-      leftWallEvent = 'onLeft';
+      leftWallEvent = name+'_onLeft';
     }
 
     if( isTouching(Touching.WALL)  ){
-      wallEvent = 'onSide';
+      wallEvent = name+'_onSide';
     }
 
     if( isTouching(Touching.BOTTOM)  ){
-      groundEvent = 'onBottom';
+      groundEvent = name+'_onBottom';
     }
 
     if( isTouching(Touching.ANY)  ){
-      colladingEvent = 'collading';
+      colladingEvent = name+'_collading';
     }
 
     if( rightWallEvent != lastRightWallEvent ){

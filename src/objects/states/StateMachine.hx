@@ -24,8 +24,12 @@ class StateMachine {
     if(currentState != null){
       currentState.onLeave();
     }
+
     currentState = states.get(name);
-    currentState.onEnter();
+
+    if(currentState != null){
+      currentState.onEnter();
+    }
 
   }
 

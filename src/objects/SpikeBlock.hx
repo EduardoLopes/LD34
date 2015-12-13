@@ -18,12 +18,20 @@ import states.Game;
 import components.BodySetup;
 import components.TouchingChecker;
 
+import objects.states.StateMachine;
+import objects.states.spikeBlock.Jump;
+import objects.states.spikeBlock.Walk;
+
+
 class SpikeBlock extends engine.Sprite {
 
   public var type : CbType;
   public var body : Body;
   public var physics : BodySetup;
   public var core : Shape;
+  public var states : StateMachine;
+  public var onGround : Bool;
+
 
   function new (object:Dynamic, level : Level){
 
@@ -36,10 +44,14 @@ class SpikeBlock extends engine.Sprite {
       depth: 3
     });
 
+    states = new StateMachine();
+    states.add( new Jump( this ) );
+    states.add( new Walk( this ) );
+
     type = new CbType();
 
     physics = add(new BodySetup({
-      bodyType: BodyType.STATIC,
+      bodyType: BodyType.DYNAMIC,
       types: [type, Main.types.Floor],
       polygon: Polygon.box(16, 16)
     }));
@@ -50,31 +62,57 @@ class SpikeBlock extends engine.Sprite {
     body.position.x = pos.x;
     body.position.y = pos.y;
 
-    add( new TouchingChecker(Main.types.Player, type) );
+    add( new TouchingChecker('player-block', Main.types.Player, type) );
+    add( new TouchingChecker('block-floor', type, Main.types.Floor) );
+    add( new TouchingChecker('block-block', type, type) );
 
-    events.listen('collading', function(_){
+    events.listen('player-block_collading', function(_){
       Main.state.set('game');
     });
+
+    if(object.properties.get('state') != null){
+      states.set( object.properties.get('state') );
+    }
 
   }
 
   override public function ondestroy(){
 
     if(this.geometry != null) this.geometry.drop(true);
+
+    if(has('player-block')){
+      remove('player-block');
+    }
+
+    if(has('block-floor')){
+      remove('block-floor');
+    }
+
+    if(has('block-block')){
+      remove('block-block');
+    }
+
     super.ondestroy();
 
-    visible = false;
-    active = false;
     if(body != null){
       Luxe.physics.nape.space.bodies.remove( body );
     }
     body = null;
     core = null;
 
+    //clean up state events
+    states.set('none');
+
   }
 
   override function update(dt:Float){
 
+    states.update(dt);
+
+    pos.x = body.position.x;
+    pos.y = body.position.y;
+
+    pos = pos.int();
 
   }
 

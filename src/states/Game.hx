@@ -81,7 +81,7 @@ class Game extends State {
 
     var map_ID = Luxe.utils.random.int(-2, 14);
 
-    map_ID = Math.floor(Math.max(1, Math.min(map_ID, 8)));
+    map_ID = Math.floor(Math.max(1, Math.min(map_ID, 12)));
 
     var res = Luxe.resources.text('assets/maps/map_'+map_ID+'.tmx');
 
