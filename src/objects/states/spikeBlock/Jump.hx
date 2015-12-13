@@ -29,13 +29,12 @@ class Jump extends ObjectState {
 
     if(timer <= 0 && onGround == true){
 
-      block.body.velocity.y = jumpForce;
-      onGround = false;
-
-      timer = time;
+      if(block.anim.animation != 'fill_up') {
+        block.anim.animation = 'fill_up';
+        block.anim.play();
+      }
 
     }
-
   }
 
 
@@ -46,11 +45,37 @@ class Jump extends ObjectState {
 
     timer = time;
 
+    block.events.listen('animation.fill_up.end', function(_){
+
+      block.body.velocity.y = jumpForce;
+      onGround = false;
+
+      timer = time;
+
+      Luxe.timer.schedule(0.1, function(){
+
+        if(block.anim.animation != 'jump') {
+          block.anim.animation = 'jump';
+          block.anim.play();
+        }
+
+      });
+
+
+
+    });
+
     block.body.type = BodyType.DYNAMIC;
 
     block.events.listen('block-floor_onBottom', function(_){
       onGround = true;
       block.body.setShapeMaterials(Materials.Ground);
+
+      if(block.anim.animation != 'idle') {
+        block.anim.animation = 'idle';
+        block.anim.play();
+      }
+
     });
 
     block.events.listen('block-floor_offBottom', function(_){

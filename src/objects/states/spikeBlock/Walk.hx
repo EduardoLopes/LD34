@@ -25,15 +25,20 @@ class Walk extends ObjectState {
 
     if(direction){
       walkForce = 150;
+      block.flipx = false;
     } else {
       walkForce = -150;
+      block.flipx = true;
     }
 
     block.body.velocity.x = walkForce;
 
+    if(block.anim.animation != 'walk') {
+      block.anim.animation = 'walk';
+      block.anim.play();
+    }
+
   }
-
-
 
   override function onEnter():Void{
 

@@ -1,0 +1,26 @@
+{
+    "fill_up" : {
+        "frame_size":{ "x":"16", "y":"16" },
+        "frameset": ["1-4"],
+        "loop": "false",
+        "speed": "16"
+    },
+    "jump" : {
+        "frame_size":{ "x":"16", "y":"16" },
+        "frameset": ["5-7"],
+        "loop": "true",
+        "speed": "16"
+    },
+    "walk" : {
+        "frame_size":{ "x":"16", "y":"16" },
+        "frameset": ["8-10"],
+        "loop": "true",
+        "speed": "16"
+    },
+    "idle" : {
+        "frame_size":{ "x":"16", "y":"16" },
+        "frameset": ["11-16"],
+        "loop": "true",
+        "speed": "16"
+    }
+}

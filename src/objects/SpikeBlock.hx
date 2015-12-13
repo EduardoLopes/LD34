@@ -31,6 +31,7 @@ class SpikeBlock extends engine.Sprite {
   public var core : Shape;
   public var states : StateMachine;
   public var onGround : Bool;
+  public var anim : SpriteAnimation;
 
 
   function new (object:Dynamic, level : Level){
@@ -76,7 +77,12 @@ class SpikeBlock extends engine.Sprite {
       states.set( object.properties.get('state') );
     }
 
+    var anim_object = Luxe.resources.json('assets/jsons/block_spike_animation.json');
 
+    anim = add( new SpriteAnimation({ name:'anim' }) );
+    anim.add_from_json_object( anim_object.asset.json );
+    anim.animation = 'idle';
+    anim.play();
 
   }
 

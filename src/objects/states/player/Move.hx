@@ -22,10 +22,12 @@ class Move extends ObjectState {
 
     if(player.onRightWall){
       player.walkForce = 150;
+      player.flipx = false;
     }
 
     if(player.onLeftWall){
       player.walkForce = -150;
+      player.flipx = true;
     }
 
     player.body.velocity.x = player.walkForce;

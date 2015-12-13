@@ -40,7 +40,9 @@ class Main extends luxe.Game {
 
     var parcel = new Parcel({
       fonts : [],
-      jsons : [],
+      jsons : [
+        { id : 'assets/jsons/block_spike_animation.json' }
+      ],
       texts : [
         {id : 'assets/maps/initial_map.tmx'},
         {id : 'assets/maps/map_1.tmx'},
