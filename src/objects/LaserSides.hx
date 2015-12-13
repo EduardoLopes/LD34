@@ -90,6 +90,11 @@ class LaserSides extends engine.Sprite {
 
   public function shoot(){
 
+    pos.x = body.position.x;
+    pos.y = body.position.y;
+
+    pos = pos.int();
+
     if(shotTimer <= 0){
 
       shotTimer = shotTime;
@@ -125,11 +130,6 @@ class LaserSides extends engine.Sprite {
   }
 
   override function update(dt:Float){
-
-    pos.x = body.position.x;
-    pos.y = body.position.y;
-
-    pos = pos.int();
 
     shotTimer -= dt;
     killTimer -= dt;

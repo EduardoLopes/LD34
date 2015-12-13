@@ -90,6 +90,12 @@ class LaserUp extends engine.Sprite {
 
   public function shoot(){
 
+    pos.x = body.position.x;
+    pos.y = body.position.y - 48;
+
+    pos = pos.int();
+
+
     if(shotTimer <= 0){
 
       shotTimer = shotTime;
@@ -125,11 +131,6 @@ class LaserUp extends engine.Sprite {
   }
 
   override function update(dt:Float){
-
-    pos.x = body.position.x;
-    pos.y = body.position.y - 48;
-
-    pos = pos.int();
 
     shotTimer -= dt;
     killTimer -= dt;

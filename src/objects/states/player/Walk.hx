@@ -24,7 +24,12 @@ class Walk extends Move {
     }
 
     if(Luxe.input.inputpressed('shoot')){
+
+      player.laserUp.body.position.x = player.body.position.x;
+      player.laserUp.body.position.y = player.body.position.y;
+
       player.laserUp.shoot();
+
     }
 
   }

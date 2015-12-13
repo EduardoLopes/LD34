@@ -27,6 +27,9 @@ class Jump extends Move {
     }
 
     if(Luxe.input.inputpressed('shoot')){
+      player.laserSides.body.position.x = player.body.position.x;
+      player.laserSides.body.position.y = player.body.position.y;
+
       player.laserSides.shoot();
     }
 

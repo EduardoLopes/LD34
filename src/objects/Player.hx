@@ -170,11 +170,7 @@ class Player extends Sprite {
 
     pos = pos.int();
 
-    laserSides.body.position.x = pos.x;
-    laserSides.body.position.y = pos.y;
 
-    laserUp.body.position.x = pos.x;
-    laserUp.body.position.y = pos.y;
 
   }
 
