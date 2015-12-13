@@ -18,6 +18,7 @@ import luxe.importers.tiled.TiledObjectGroup;
 import objects.states.StateMachine;
 import objects.states.player.Jump;
 import objects.states.player.Walk;
+import objects.states.player.Move;
 
 import components.BodySetup;
 import components.TouchingChecker;
@@ -65,6 +66,7 @@ class Player extends Sprite {
     states = new StateMachine();
     states.add( new Jump( this ) );
     states.add( new Walk( this ) );
+    states.add( new Move( this ) );
 
     canMove = true;
     onGround = false;

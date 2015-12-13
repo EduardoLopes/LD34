@@ -2,7 +2,7 @@ package objects.states.player;
 
 import objects.Player;
 
-class Jump extends Walk {
+class Jump extends Move {
 
   var jumps : Float = 1;
   var jumpForce : Float = -300;
