@@ -25,6 +25,8 @@ import components.TouchingChecker;
 
 import objects.states.StateMachine;
 
+import components.CameraShaker;
+
 
 class LaserSides extends engine.Sprite {
 
@@ -99,6 +101,7 @@ class LaserSides extends engine.Sprite {
 
     if(killTimer > 0){
       cb.int2.userData.kill();
+      Luxe.camera.get('shaker').shake(ShakeDirection.RANDOM, 0.06, 2);
     };
 
   }
@@ -111,6 +114,8 @@ class LaserSides extends engine.Sprite {
     pos = pos.int();
 
     if(shotTimer <= 0 && visible == false){
+
+      Luxe.camera.get('shaker').shake(ShakeDirection.RANDOM, 0.06, 1);
 
       anim.animation = 'shoot';
       anim.play();

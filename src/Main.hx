@@ -12,6 +12,7 @@ import luxe.States;
 import phoenix.Texture;
 
 import components.CameraFollower;
+import components.CameraShaker;
 
 import states.Game;
 
@@ -125,6 +126,7 @@ class Main extends luxe.Game {
     types = new Types();
     materials = new Materials();
 
+    Luxe.camera.add(new CameraShaker({name: 'shaker'}));
     Luxe.camera.add(new CameraFollower({name: 'follower'}));
 
     parcel.load();
