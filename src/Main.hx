@@ -9,6 +9,8 @@ import luxe.Parcel;
 import luxe.ParcelProgress;
 import luxe.States;
 
+import phoenix.Texture;
+
 import components.CameraFollower;
 
 import states.Game;
@@ -86,6 +88,8 @@ class Main extends luxe.Game {
       ],
       sounds : []
     });
+
+    phoenix.Texture.default_filter = FilterType.nearest;
 
     new ParcelProgress({
       parcel      : parcel,
