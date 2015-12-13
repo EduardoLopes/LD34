@@ -26,7 +26,7 @@ import components.TouchingChecker;
 import objects.states.StateMachine;
 
 
-class Laser extends engine.Sprite {
+class LaserSides extends engine.Sprite {
 
   public var type : CbType;
   public var body : Body;
@@ -41,9 +41,9 @@ class Laser extends engine.Sprite {
   function new (x:Float, y:Float){
 
     super({
-      name: 'LASER',
+      name: 'LASER_SIDES',
       name_unique: true,
-      pos: new Vector(x + 8, y + 8),
+      pos: new Vector(x, y),
       size: new Vector(144, 12),
       color: new Color().rgb(0xe0f038),
       depth: 3
@@ -73,7 +73,7 @@ class Laser extends engine.Sprite {
 
     Luxe.physics.nape.space.listeners.add(new InteractionListener(
       CbEvent.ONGOING, InteractionType.SENSOR,
-      Main.types.Laser,
+      type,
       Main.types.Block,
       laserSensor
     ));

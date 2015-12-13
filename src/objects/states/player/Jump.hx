@@ -26,6 +26,10 @@ class Jump extends Move {
 
     }
 
+    if(Luxe.input.inputpressed('shoot')){
+      player.laserSides.shoot();
+    }
+
     if(player.onGround == true){
       machine.set('walk');
     }
