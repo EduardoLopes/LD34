@@ -22,5 +22,11 @@
         "frameset": ["11-16"],
         "loop": "true",
         "speed": "16"
+    },
+    "dead" : {
+        "frame_size":{ "x":"16", "y":"16" },
+        "frameset": ["17-19"],
+        "loop": "false",
+        "speed": "16"
     }
 }

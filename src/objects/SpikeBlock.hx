@@ -84,10 +84,24 @@ class SpikeBlock extends engine.Sprite {
     anim.animation = 'idle';
     anim.play();
 
+    events.listen('animation.dead.end', function(_){
+
+      visible = false;
+
+      destroy();
+
+
+    });
+
   }
 
   public function kill(){
-    destroy();
+
+    anim.animation = 'dead';
+    anim.play();
+
+    states.set('none');
+
   };
 
   override public function ondestroy(){
@@ -114,7 +128,6 @@ class SpikeBlock extends engine.Sprite {
     body = null;
     core = null;
 
-    //clean up state events
     states.set('none');
 
   }
