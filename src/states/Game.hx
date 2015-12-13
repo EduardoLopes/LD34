@@ -15,6 +15,8 @@ import nape.callbacks.PreListener;
 import luxe.physics.nape.DebugDraw;
 import components.CameraFollower;
 
+import luxe.Text;
+
 import phoenix.Texture.ClampType;
 
 class Game extends State {
@@ -25,6 +27,7 @@ class Game extends State {
   var IDLastLevelCreated : Int = 0;
   var background_1 : luxe.Sprite;
   var background_2 : luxe.Sprite;
+  var text : Text;
 
   public function new() {
 
@@ -97,6 +100,17 @@ class Game extends State {
       texture: Luxe.resources.texture('assets/images/background_2.png')
     });
 
+    text = new Text({
+      text: '0',
+      pos : new Vector(0, 128),
+      point_size : 32,
+      color: new luxe.Color().rgb(0xdad45e),
+      font: Luxe.resources.font('assets/fonts/font.fnt'),
+      batcher: Main.foregroundBatcher,
+      bounds : new luxe.Rectangle(0, 0, 24, 24),
+      align: left
+    });
+
     background_1.texture.clamp_t = ClampType.repeat;
     background_1.texture.clamp_s = ClampType.repeat;
     background_2.texture.clamp_t = ClampType.repeat;
@@ -165,6 +179,8 @@ class Game extends State {
     background_1.uv.y = (Luxe.camera.pos.y) * 0.8;
     background_2.uv.x = (Luxe.camera.pos.x) * 0.4;
     background_2.uv.y = (Luxe.camera.pos.y) * 0.4;
+
+    text.text = Std.string(Math.abs(CameraFollower.currentPositionNormal.y - 2));
 
     for(level in levels){
 

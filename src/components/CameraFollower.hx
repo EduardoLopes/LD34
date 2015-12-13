@@ -18,7 +18,7 @@ class CameraFollower extends Component {
   public static var screenMiddle : Vector;
   public static var tweenComplete;
   var zoom : Vector;
-  var currentPositionNormal : Vector;
+  public static var currentPositionNormal : Vector;
 
   override function init() {
 

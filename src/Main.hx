@@ -43,7 +43,9 @@ class Main extends luxe.Game {
   override function ready() {
 
     var parcel = new Parcel({
-      fonts : [],
+      fonts : [
+        { id:'assets/fonts/font.fnt' },
+      ],
       jsons : [
         { id : 'assets/jsons/block_spike_animation.json' },
         { id : 'assets/jsons/laser_sides_animation.json' },
