@@ -42,8 +42,8 @@ class Main extends luxe.Game {
       fonts : [],
       jsons : [],
       texts : [
-        {id : 'assets/maps/test.tmx'},
-        {id : 'assets/maps/test2.tmx'}
+        {id : 'assets/maps/initial_map.tmx'},
+        {id : 'assets/maps/map_1.tmx'}
       ],
       textures : [
         {id : 'assets/images/collision-tile.png'},
