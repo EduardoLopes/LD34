@@ -48,6 +48,8 @@ class Player extends Sprite {
 
   public var states : StateMachine;
 
+  var laser : Laser;
+
   public function new (object:TiledObject, level : Level){
 
     super({
@@ -57,6 +59,8 @@ class Player extends Sprite {
       depth: 3.4,
       size: new Vector(16, 16)
     });
+
+    laser = new Laser(pos.x, pos.y);
 
     states = new StateMachine();
     states.add( new Jump( this ) );
@@ -161,6 +165,9 @@ class Player extends Sprite {
     pos.y = body.position.y;
 
     pos = pos.int();
+
+    laser.body.position.x = pos.x;
+    laser.body.position.y = pos.y;
 
   }
 

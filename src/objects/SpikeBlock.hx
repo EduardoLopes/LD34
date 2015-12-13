@@ -52,7 +52,7 @@ class SpikeBlock extends engine.Sprite {
 
     physics = add(new BodySetup({
       bodyType: BodyType.DYNAMIC,
-      types: [type, Main.types.Floor],
+      types: [type, Main.types.Floor, Main.types.Block],
       polygon: Polygon.box(16, 16)
     }));
 

@@ -7,6 +7,8 @@ class Types{
   public var Movable : CbType;
   public var OneWay : CbType;
   public var Player : CbType;
+  public var Laser : CbType;
+  public var Block : CbType;
 
   public function new(){
 
@@ -15,6 +17,8 @@ class Types{
     Movable = new CbType();
     OneWay = new CbType();
     Player = new CbType();
+    Laser = new CbType();
+    Block = new CbType();
 
   }
 
