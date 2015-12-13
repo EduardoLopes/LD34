@@ -46,11 +46,19 @@ class Main extends luxe.Game {
         {id : 'assets/maps/map_1.tmx'},
         {id : 'assets/maps/map_2.tmx'},
         {id : 'assets/maps/map_3.tmx'},
-        {id : 'assets/maps/map_4.tmx'}
+        {id : 'assets/maps/map_4.tmx'},
+        {id : 'assets/maps/map_5.tmx'},
+        {id : 'assets/maps/map_6.tmx'},
+        {id : 'assets/maps/map_7.tmx'},
+        {id : 'assets/maps/map_8.tmx'},
+        {id : 'assets/maps/map_9.tmx'},
+        {id : 'assets/maps/map_10.tmx'},
+        {id : 'assets/maps/map_11.tmx'}
       ],
       textures : [
         {id : 'assets/images/collision-tile.png'},
-        {id : 'assets/images/tiles.png'}
+        {id : 'assets/images/tiles.png'},
+        {id : 'assets/images/spike_block.png'}
       ],
       sounds : []
     });

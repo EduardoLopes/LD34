@@ -18,6 +18,8 @@ import objects.Player;
 import states.Game;
 import components.CameraFollower;
 
+import objects.SpikeBlock;
+
 class Level extends TiledLevel{
 
   var body : Body;
