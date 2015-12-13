@@ -50,6 +50,18 @@ class SpikeBlock extends engine.Sprite {
     body.position.x = pos.x;
     body.position.y = pos.y;
 
+    add( new TouchingChecker(Main.types.Player, type) );
+
+    events.listen('collading', function(_){
+      Main.state.set('game');
+    });
+
+  }
+
+  override function ondestroy(){
+
+
+
   }
 
   override function update(dt:Float){

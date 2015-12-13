@@ -182,12 +182,12 @@ class TiledLevel extends TiledMap{
 
   public function clear_quadPackGeometry() {
 
-    for( g in geom.keys() ){
-
-      geom.get(g).drop(true);
-      geom.set(g, null);
-      geom.remove(g);
-
+    for( g in geom ){
+      if(g != null){
+        g.clear();
+        g.drop();
+        g = null;
+      }
     }
 
   }

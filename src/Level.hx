@@ -84,16 +84,34 @@ class Level extends TiledLevel{
 
   }
 
+  public function clear(){
+
+    for( entity in entities ){
+      if(entity != null){
+        entity.visible = false;
+        entity.active = false;
+        Luxe.scene.remove( entity );
+        entity.destroy();
+        entity = null;
+      }
+    }
+
+    clear_quadPackGeometry();
+    Game.levels.set(level_ID, null);
+    Game.levels.remove(level_ID);
+    body = null;
+    destroy(true);
+
+  }
+
   public function update(dt:Float){
 
     if(pos.y > Luxe.camera.pos.y + Main.gameResolution.y + (CameraFollower.cameraOffset.y / 2)){
-      display({ visible: false, scale:1 });
-      clear_quadPackGeometry();
-      destroy(true);
-      Game.levels.remove(level_ID);
+
       body.space = null;
-      body = null;
+      clear();
       Luxe.events.fire('create_one_level');
+
     }
 
   }

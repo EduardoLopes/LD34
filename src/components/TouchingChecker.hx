@@ -207,16 +207,12 @@ class TouchingChecker extends Component {
 
     }
 
-    object.events.fire('onGoing_'+rightWallEvent);
-
     if( leftWallEvent != lastLeftWallEvent ){
 
       object.events.fire(leftWallEvent);
       lastLeftWallEvent = leftWallEvent;
 
     }
-
-    object.events.fire('onGoing_'+leftWallEvent);
 
     if( wallEvent != lastWallEvent ){
 
@@ -225,8 +221,6 @@ class TouchingChecker extends Component {
 
     }
 
-    object.events.fire('onGoing_'+wallEvent);
-
     if( groundEvent != lastGroundEvent ){
 
       object.events.fire(groundEvent);
@@ -234,16 +228,12 @@ class TouchingChecker extends Component {
 
     }
 
-    object.events.fire('onGoing_'+groundEvent);
-
     if( colladingEvent != lastColladingEvent ){
 
       object.events.fire(colladingEvent);
       lastColladingEvent = colladingEvent;
 
     }
-
-    object.events.fire('onGoing_'+colladingEvent);
 
     //clean up collision index
     wasTouching = touching;

@@ -121,6 +121,20 @@ class Player extends Sprite {
 
   }
 
+  override function ondestroy(){
+
+    events.unlisten('onBottom');
+    events.unlisten('offBottom');
+    events.unlisten('onSide');
+    events.unlisten('offSide');
+    events.unlisten('offLeft');
+    events.unlisten('onRight');
+    events.unlisten('offRight');
+
+    remove('ground_checker');
+
+  }
+
   override function update(dt:Float) {
 
     super.update(dt);

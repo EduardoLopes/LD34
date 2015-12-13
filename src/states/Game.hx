@@ -73,6 +73,8 @@ class Game extends State {
 
     enable();
 
+    Luxe.camera.get('follower').resetCamera();
+
   }
 
   function create_level(y:Int){
@@ -131,8 +133,26 @@ class Game extends State {
 
   }
 
-
   override function onleave<T>(_:T) {
+
+    level.clear();
+    level = null;
+    IDLastLevelCreated = 0;
+
+    for(level in levels){
+      if(level != null){
+        level.clear();
+      }
+    }
+
+    //Luxe.scene.empty();
+    Luxe.renderer.batcher.empty();
+    //Luxe.scene.add(Luxe.camera);
+
+
+    levels = null;
+
+    Luxe.physics.nape.space.clear();
 
   }
 

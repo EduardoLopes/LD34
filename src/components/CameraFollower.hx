@@ -47,6 +47,16 @@ class CameraFollower extends Component {
 
   }
 
+  public function resetCamera(){
+
+    camera.pos.x = -(cameraOffset.x / 2);
+    camera.pos.y =  (Math.floor(follower.pos.y / 80) * 80) - screenMiddle.y;
+
+    currentPositionNormal.y = Math.floor(follower.pos.y / 80);
+
+    Actuate.stop(camera.pos);
+  }
+
   public function setFollower(Follower : Player){
 
     follower = Follower;
@@ -60,6 +70,8 @@ class CameraFollower extends Component {
     var normal = Math.floor(follower.pos.y / 80);
 
     if(normal != currentPositionNormal.y && follower.onGround){
+
+      Actuate.stop(camera.pos);
 
       Actuate.tween(camera.pos, 0.5, {y: (normal * 80) - screenMiddle.y} )
       .ease(luxe.tween.easing.Quad.easeInOut)
