@@ -65,8 +65,11 @@ class Main extends luxe.Game {
         {id : 'assets/maps/map_20.tmx'},
         {id : 'assets/maps/map_21.tmx'},
         {id : 'assets/maps/map_22.tmx'},
-        {id : 'assets/maps/map_23.tmx'}
-
+        {id : 'assets/maps/map_23.tmx'},
+        {id : 'assets/maps/map_24.tmx'},
+        {id : 'assets/maps/map_25.tmx'},
+        {id : 'assets/maps/map_26.tmx'},
+        {id : 'assets/maps/map_27.tmx'}
       ],
       textures : [
         {id : 'assets/images/collision-tile.png'},
