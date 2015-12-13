@@ -77,7 +77,9 @@ class Game extends State {
 
   function create_level(y:Int){
 
-    var res = Luxe.resources.text('assets/maps/map_1.tmx');
+    var map_ID = Luxe.utils.random.int(1, 4);
+
+    var res = Luxe.resources.text('assets/maps/map_'+map_ID+'.tmx');
 
     var level = new Level({
       tiled_file_data: res.asset.text,

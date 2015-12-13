@@ -8,12 +8,12 @@
  </tileset>
  <layer name="Tile Layer 1" width="15" height="5">
   <data encoding="base64" compression="zlib">
-   eJxjZCAPMELxYNfLiMYGYSYyMEgfAAqoACY=
+   eJxjZCAPMEIxJXpJ1c+IBZOjj4kMDNIHAAz8ACs=
   </data>
  </layer>
  <layer name="collision" width="15" height="5" opacity="0.4">
   <data encoding="base64" compression="zlib">
-   eJxzZCAPOELxYNfriMamxF4AlncCzA==
+   eJxzZCAPOEIxJXpJ1e+IBZOjjxwA0gcALdoEEQ==
   </data>
  </layer>
  <layer name="one_way_plataforms" width="15" height="5" opacity="0.4">
