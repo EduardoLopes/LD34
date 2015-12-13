@@ -23,6 +23,11 @@ class Walk extends Move {
 
     }
 
+    if(player.anim.animation != 'walk' && player.anim.animation != 'shoot') {
+      player.anim.animation = 'walk';
+      player.anim.play();
+    }
+
     if(Luxe.input.inputpressed('shoot')){
 
       player.laserUp.body.position.x = player.body.position.x;
@@ -30,7 +35,24 @@ class Walk extends Move {
 
       player.laserUp.shoot();
 
+      player.anim.animation = 'shoot';
+      player.anim.play();
+
     }
+
+  }
+
+  override function onEnter(){
+    super.onEnter();
+
+    player.events.listen('animation.shoot.end', function(_){
+
+      Luxe.timer.schedule(0.1, function(){
+        player.anim.animation = 'walk';
+        player.anim.play();
+      });
+
+    });
 
   }
 

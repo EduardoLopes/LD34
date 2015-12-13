@@ -26,11 +26,19 @@ class Jump extends Move {
 
     }
 
+    if(player.anim.animation != 'jump' && player.anim.animation != 'shoot') {
+      player.anim.animation = 'jump';
+      player.anim.play();
+    }
+
     if(Luxe.input.inputpressed('shoot')){
       player.laserSides.body.position.x = player.body.position.x;
       player.laserSides.body.position.y = player.body.position.y;
 
       player.laserSides.shoot();
+      player.anim.animation = 'shoot';
+
+      player.anim.play();
     }
 
     if(player.onGround == true){
@@ -46,6 +54,16 @@ class Jump extends Move {
     jumps = 1;
     player.onGround = false;
     player.body.velocity.y = jumpForce;
+
+    player.events.listen('animation.shoot.end', function(_){
+
+      Luxe.timer.schedule(0.1, function(){
+        player.anim.animation = 'jump';
+        player.anim.play();
+      });
+
+    });
+
 
   }
 

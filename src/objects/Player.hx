@@ -51,12 +51,13 @@ class Player extends Sprite {
 
   public var laserSides : LaserSides;
   public var laserUp : LaserUp;
+  public var anim : SpriteAnimation;
 
   public function new (object:TiledObject, level : Level){
 
     super({
       pos: new Vector(level.pos.x + object.pos.x, level.pos.y + object.pos.y),
-      color: new Color().rgb(0xffffff),
+      texture: Luxe.resources.texture('assets/images/player.png'),
       name: object.name,
       depth: 3.4,
       size: new Vector(16, 16)
@@ -124,6 +125,11 @@ class Player extends Sprite {
     });
 
     body.userData.name = 'player';
+
+    var anim_object = Luxe.resources.json('assets/jsons/player_animation.json');
+
+    anim = add( new SpriteAnimation({ name:'anim' }) );
+    anim.add_from_json_object( anim_object.asset.json );
 
     states.set('walk');
 
