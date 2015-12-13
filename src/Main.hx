@@ -41,7 +41,8 @@ class Main extends luxe.Game {
     var parcel = new Parcel({
       fonts : [],
       jsons : [
-        { id : 'assets/jsons/block_spike_animation.json' }
+        { id : 'assets/jsons/block_spike_animation.json' },
+        { id : 'assets/jsons/laser_sides_animation.json' }
       ],
       texts : [
         {id : 'assets/maps/initial_map.tmx'},
@@ -76,7 +77,8 @@ class Main extends luxe.Game {
       textures : [
         {id : 'assets/images/collision-tile.png'},
         {id : 'assets/images/tiles.png'},
-        {id : 'assets/images/spike_block.png'}
+        {id : 'assets/images/spike_block.png'},
+        {id : 'assets/images/laser_sides.png'}
       ],
       sounds : []
     });
