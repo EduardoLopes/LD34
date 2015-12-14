@@ -32,6 +32,7 @@ class SpikeBlock extends engine.Sprite {
   public var states : StateMachine;
   public var onGround : Bool;
   public var anim : SpriteAnimation;
+  public var invencible : Bool = false;
 
 
   function new (object:Dynamic, level : Level){
@@ -44,6 +45,13 @@ class SpikeBlock extends engine.Sprite {
       texture: Luxe.resources.texture('assets/images/spike_block.png'),
       depth: 3
     });
+
+    if(Luxe.utils.random.bool(0.5)){
+
+      texture = Luxe.resources.texture('assets/images/spike_block_2.png');
+      invencible = true;
+
+    }
 
     states = new StateMachine();
     states.add( new Jump( this ) );
@@ -97,10 +105,13 @@ class SpikeBlock extends engine.Sprite {
 
   public function kill(){
 
-    anim.animation = 'dead';
-    anim.play();
+    if(invencible == false){
+      anim.animation = 'dead';
+      anim.play();
 
-    states.set('none');
+      states.set('none');
+    }
+
 
   };
 

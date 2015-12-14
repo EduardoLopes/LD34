@@ -19,7 +19,7 @@ class Jump extends Move {
 
     super.update(dt);
 
-    if(Luxe.input.inputpressed('jump') && jumps == 1 && player.onGround == false){
+    if(Luxe.input.inputpressed('jump') && jumps == 1){
 
       player.body.velocity.y = jumpForce;
       jumps--;
