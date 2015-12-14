@@ -17,7 +17,7 @@ class Walk extends Move {
 
     super.update(dt);
 
-    if(Luxe.input.inputpressed('jump') && player.onGround == true){
+    if(Luxe.input.inputpressed('jump')){
 
       machine.set('jump');
 
