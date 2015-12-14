@@ -1,0 +1,8 @@
+{
+    "shoot" : {
+        "frame_size":{ "x":"144", "y":"12" },
+        "frameset": ["1-3"],
+        "loop": "false",
+        "speed": "16"
+    }
+}
