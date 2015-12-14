@@ -1,0 +1,25 @@
+{
+  "name": "ld34",
+  "version": "0.1.0",
+  "description": "",
+  "main": "gulpfile.js",
+  "scripts": {
+    "deploy": "gulp deploy"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/EduardoLopes/LD34.git"
+  },
+  "author": "“Eduardo <EduardoLopesDS@gmail.com> (http://square64.tumblr.com/)",
+  "bugs": {
+    "url": "https://github.com/EduardoLopes/LD34/issues"
+  },
+  "homepage": "https://github.com/EduardoLopes/LD34#readme",
+  "devDependencies": {
+    "gulp": "^3.9.0",
+    "gulp-gh-pages": "^0.5.2"
+  }
+}
+
+
+
