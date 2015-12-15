@@ -222,10 +222,7 @@ luxe_tilemaps_Tilemap.prototype = {
 	,tile_at: function(layer_name,x,y) {
 		if(this.inside(x,y)) {
 			var _layer = this.layers.get(layer_name);
-			if(_layer != null) return _layer.tiles[y][x]; else {
-				haxe_Log.trace("No tile layer called '" + layer_name + "' for tile_at " + x + "," + y,{ fileName : "Tilemap.hx", lineNumber : 649, className : "luxe.tilemaps.Tilemap", methodName : "tile_at"});
-				return null;
-			}
+			if(_layer != null) return _layer.tiles[y][x]; else return null;
 		} else return null;
 	}
 	,iterator: function() {
@@ -296,7 +293,7 @@ luxe_tilemaps_Tilemap.prototype = {
 				}
 				_layer.tiles.push(_tile_row);
 			}
-		} else haxe_Log.trace("No tile layer called '" + layer_name + "' for add_tiles_fill_by_id",{ fileName : "Tilemap.hx", lineNumber : 786, className : "luxe.tilemaps.Tilemap", methodName : "add_tiles_fill_by_id"});
+		} else null;
 	}
 	,add_tiles_from_grid: function(layer_name,grid) {
 		if(grid.length != this.height) throw new js__$Boot_HaxeError("add_tiles_from_grid requires a grid of integers the same size as the tilemap! height != grid.length");
@@ -322,7 +319,7 @@ luxe_tilemaps_Tilemap.prototype = {
 				}
 				_layer.tiles.push(_tile_row);
 			}
-		} else haxe_Log.trace("No tile layer called '" + layer_name + "' for add_tiles_from_grid",{ fileName : "Tilemap.hx", lineNumber : 833, className : "luxe.tilemaps.Tilemap", methodName : "add_tiles_from_grid"});
+		} else null;
 	}
 	,destroy: function(_keep_visual) {
 		if(_keep_visual == null) _keep_visual = false;
@@ -609,7 +606,7 @@ engine_TiledLevel.prototype = $extend(luxe_importers_tiled_TiledMap.prototype,{
 	,__class__: engine_TiledLevel
 });
 var Level = function(options) {
-	this.level_ID = 0;
+	this.destroyed = false;
 	engine_TiledLevel.call(this,options);
 	this.entities = new haxe_ds_StringMap();
 	this.body = new nape_phys_Body((function($this) {
@@ -671,28 +668,36 @@ Level.prototype = $extend(engine_TiledLevel.prototype,{
 			while(_g2 < _g3.length) {
 				var object = _g3[_g2];
 				++_g2;
-				var value = Type.createInstance(Type.resolveClass("objects." + object.type),[object,this]);
-				this.entities.set(object.name,value);
+				var _g4 = object.type;
+				switch(_g4) {
+				case "SpikeBlock":
+					var block = new objects_SpikeBlock(object,this);
+					var key = block.get_name();
+					this.entities.set(key,block);
+					break;
+				case "Player":
+					states_Game.player = new objects_Player(object,this);
+					break;
+				}
 			}
 		}
-		var _g4 = 0;
+		var _g5 = 0;
 		var _g11 = this.tiledmap_data.image_layers;
-		while(_g4 < _g11.length) {
-			var layer = _g11[_g4];
-			++_g4;
+		while(_g5 < _g11.length) {
+			var layer = _g11[_g5];
+			++_g5;
 			var background = new objects_Background(layer,this);
-			var key = background.get_name();
-			this.entities.set(key,background);
+			var key1 = background.get_name();
+			this.entities.set(key1,background);
 		}
 	}
 	,clear: function() {
+		this.destroyed = true;
 		var $it0 = this.entities.iterator();
 		while( $it0.hasNext() ) {
 			var entity = $it0.next();
-			if(entity != null) {
-				entity.destroy();
-				entity = null;
-			}
+			entity.destroy();
+			entity = null;
 		}
 		if(this.body != null) Luxe.physics.nape.space.zpp_inner.wrap_bodies.remove(this.body);
 		this.clear_quadPackGeometry();
@@ -702,9 +707,9 @@ Level.prototype = $extend(engine_TiledLevel.prototype,{
 		this.body = null;
 	}
 	,update: function(dt) {
-		if(this.pos.y > Luxe.camera.get_pos().y + Main.gameResolution.y + components_CameraFollower.cameraOffset.y / 2) {
+		if(components_CameraFollower.currentPositionNormal.y < -2 && Math.abs(components_CameraFollower.currentPositionNormal.y) - 3 == this.level_ID) {
+			Luxe.events.fire("create_level");
 			this.clear();
-			Luxe.events.fire("create_one_level");
 		}
 	}
 	,__class__: Level
@@ -1026,10 +1031,12 @@ Main.__super__ = luxe_Game;
 Main.prototype = $extend(luxe_Game.prototype,{
 	config: function(config) {
 		Main.gameResolution = new phoenix_Vector(config.window.width,config.window.height);
+		config.window.width = config.window.width * Main.zoom;
+		config.window.height = config.window.height * Main.zoom;
 		return config;
 	}
 	,ready: function() {
-		var parcel = new luxe_Parcel({ fonts : [{ id : "assets/fonts/font.fnt"}], jsons : [{ id : "assets/jsons/block_spike_animation.json"},{ id : "assets/jsons/laser_sides_animation.json"},{ id : "assets/jsons/laser_up_animation.json"},{ id : "assets/jsons/player_animation.json"}], texts : [{ id : "assets/maps/initial_map.tmx"},{ id : "assets/maps/map_1.tmx"},{ id : "assets/maps/map_2.tmx"},{ id : "assets/maps/map_3.tmx"},{ id : "assets/maps/map_4.tmx"},{ id : "assets/maps/map_5.tmx"},{ id : "assets/maps/map_6.tmx"},{ id : "assets/maps/map_7.tmx"},{ id : "assets/maps/map_8.tmx"},{ id : "assets/maps/map_9.tmx"},{ id : "assets/maps/map_10.tmx"},{ id : "assets/maps/map_11.tmx"},{ id : "assets/maps/map_12.tmx"},{ id : "assets/maps/map_13.tmx"},{ id : "assets/maps/map_14.tmx"},{ id : "assets/maps/map_15.tmx"},{ id : "assets/maps/map_16.tmx"},{ id : "assets/maps/map_17.tmx"},{ id : "assets/maps/map_18.tmx"},{ id : "assets/maps/map_19.tmx"},{ id : "assets/maps/map_20.tmx"},{ id : "assets/maps/map_21.tmx"},{ id : "assets/maps/map_22.tmx"},{ id : "assets/maps/map_23.tmx"},{ id : "assets/maps/map_24.tmx"},{ id : "assets/maps/map_25.tmx"},{ id : "assets/maps/map_26.tmx"},{ id : "assets/maps/map_27.tmx"}], textures : [{ id : "assets/images/collision-tile.png"},{ id : "assets/images/tiles.png"},{ id : "assets/images/spike_block.png"},{ id : "assets/images/spike_block_2.png"},{ id : "assets/images/laser_sides.png"},{ id : "assets/images/laser_up.png"},{ id : "assets/images/background_1.png"},{ id : "assets/images/background_2.png"},{ id : "assets/images/player.png"}], sounds : []});
+		var parcel = new luxe_Parcel({ fonts : [{ id : "assets/fonts/font.fnt"}], jsons : [{ id : "assets/jsons/block_spike_animation.json"},{ id : "assets/jsons/laser_sides_animation.json"},{ id : "assets/jsons/laser_up_animation.json"},{ id : "assets/jsons/player_animation.json"}], texts : [{ id : "assets/maps/map_0.tmx"},{ id : "assets/maps/map_1.tmx"},{ id : "assets/maps/map_2.tmx"},{ id : "assets/maps/map_3.tmx"},{ id : "assets/maps/map_4.tmx"},{ id : "assets/maps/map_5.tmx"},{ id : "assets/maps/map_6.tmx"},{ id : "assets/maps/map_7.tmx"},{ id : "assets/maps/map_8.tmx"},{ id : "assets/maps/map_9.tmx"},{ id : "assets/maps/map_10.tmx"},{ id : "assets/maps/map_11.tmx"},{ id : "assets/maps/map_12.tmx"},{ id : "assets/maps/map_13.tmx"},{ id : "assets/maps/map_14.tmx"},{ id : "assets/maps/map_15.tmx"},{ id : "assets/maps/map_16.tmx"},{ id : "assets/maps/map_17.tmx"},{ id : "assets/maps/map_18.tmx"},{ id : "assets/maps/map_19.tmx"},{ id : "assets/maps/map_20.tmx"},{ id : "assets/maps/map_21.tmx"},{ id : "assets/maps/map_22.tmx"},{ id : "assets/maps/map_23.tmx"},{ id : "assets/maps/map_24.tmx"},{ id : "assets/maps/map_25.tmx"},{ id : "assets/maps/map_26.tmx"},{ id : "assets/maps/map_27.tmx"}], textures : [{ id : "assets/images/collision-tile.png"},{ id : "assets/images/tiles.png"},{ id : "assets/images/spike_block.png"},{ id : "assets/images/spike_block_2.png"},{ id : "assets/images/laser_sides.png"},{ id : "assets/images/laser_up.png"},{ id : "assets/images/background_1.png"},{ id : "assets/images/background_2.png"},{ id : "assets/images/player.png"}], sounds : []});
 		phoenix_Texture.default_filter = 9728;
 		new luxe_ParcelProgress({ parcel : parcel, background : new phoenix_Color(1,1,1,0.85), oncomplete : $bind(this,this.onLoaded)});
 		Main.zoomRatio = new phoenix_Vector(Luxe.core.screen.get_w() / Main.gameResolution.x,Luxe.core.screen.get_h() / Main.gameResolution.y);
@@ -1046,6 +1053,7 @@ Main.prototype = $extend(luxe_Game.prototype,{
 		parcel.load();
 	}
 	,onLoaded: function(_) {
+		this.update_camera_scale();
 		Main.state.set("game");
 	}
 	,ongamepadaxis: function(event) {
@@ -1064,7 +1072,7 @@ Main.prototype = $extend(luxe_Game.prototype,{
 		if(event.axis == 1) {
 		}
 	}
-	,onwindowsized: function(e) {
+	,update_camera_scale: function() {
 		Main.zoomRatio.set_x(Math.floor(Luxe.core.screen.get_w() / Main.gameResolution.x));
 		Main.zoomRatio.set_y(Math.floor(Luxe.core.screen.get_h() / Main.gameResolution.y));
 		Main.zoom = Math.floor(Math.max(1,Math.min(Main.zoomRatio.x,Main.zoomRatio.y)));
@@ -1076,6 +1084,9 @@ Main.prototype = $extend(luxe_Game.prototype,{
 		Main.backgroundBatcherCamera.get_viewport().set(x,y,width,height);
 		Main.foregroundBatcherCamera.get_viewport().set(x,y,width,height);
 		Luxe.camera._components.get("follower",false).onWindowResized();
+	}
+	,onwindowsized: function(e) {
+		this.update_camera_scale();
 	}
 	,onkeyup: function(e) {
 		if(e.keycode == snow_system_input_Keycodes.escape) Luxe.shutdown();
@@ -1847,7 +1858,7 @@ components_TouchingChecker.__super__ = luxe_Component;
 components_TouchingChecker.prototype = $extend(luxe_Component.prototype,{
 	init: function() {
 		this.object = this.get_entity();
-		Luxe.physics.nape.space.zpp_inner.wrap_listeners.add(new nape_callbacks_PreListener((function($this) {
+		this.preListener_collision = new nape_callbacks_PreListener((function($this) {
 			var $r;
 			if(zpp_$nape_util_ZPP_$Flags.InteractionType_COLLISION == null) {
 				zpp_$nape_util_ZPP_$Flags.internal = true;
@@ -1856,8 +1867,8 @@ components_TouchingChecker.prototype = $extend(luxe_Component.prototype,{
 			}
 			$r = zpp_$nape_util_ZPP_$Flags.InteractionType_COLLISION;
 			return $r;
-		}(this)),this.objectType1,this.objectType2,$bind(this,this.preOnGoing),0,true));
-		Luxe.physics.nape.space.zpp_inner.wrap_listeners.add(new nape_callbacks_InteractionListener((function($this) {
+		}(this)),this.objectType1,this.objectType2,$bind(this,this.preOnGoing),0,true);
+		this.interactionListener_ongoing = new nape_callbacks_InteractionListener((function($this) {
 			var $r;
 			if(zpp_$nape_util_ZPP_$Flags.CbEvent_ONGOING == null) {
 				zpp_$nape_util_ZPP_$Flags.internal = true;
@@ -1875,8 +1886,8 @@ components_TouchingChecker.prototype = $extend(luxe_Component.prototype,{
 			}
 			$r = zpp_$nape_util_ZPP_$Flags.InteractionType_COLLISION;
 			return $r;
-		}(this)),this.objectType1,this.objectType2,$bind(this,this.onGoing)));
-		Luxe.physics.nape.space.zpp_inner.wrap_listeners.add(new nape_callbacks_InteractionListener((function($this) {
+		}(this)),this.objectType1,this.objectType2,$bind(this,this.onGoing));
+		this.interactionListener_end = new nape_callbacks_InteractionListener((function($this) {
 			var $r;
 			if(zpp_$nape_util_ZPP_$Flags.CbEvent_END == null) {
 				zpp_$nape_util_ZPP_$Flags.internal = true;
@@ -1894,62 +1905,85 @@ components_TouchingChecker.prototype = $extend(luxe_Component.prototype,{
 			}
 			$r = zpp_$nape_util_ZPP_$Flags.InteractionType_COLLISION;
 			return $r;
-		}(this)),this.objectType1,this.objectType2,$bind(this,this.end)));
+		}(this)),this.objectType1,this.objectType2,$bind(this,this.end));
+		Luxe.physics.nape.space.zpp_inner.wrap_listeners.add(this.preListener_collision);
+		Luxe.physics.nape.space.zpp_inner.wrap_listeners.add(this.interactionListener_ongoing);
+		Luxe.physics.nape.space.zpp_inner.wrap_listeners.add(this.interactionListener_end);
+	}
+	,onremoved: function() {
+		if(this.preListener_collision != null) Luxe.physics.nape.space.zpp_inner.wrap_listeners.remove(this.preListener_collision);
+		if(this.interactionListener_ongoing != null) Luxe.physics.nape.space.zpp_inner.wrap_listeners.remove(this.interactionListener_ongoing);
+		if(this.interactionListener_end != null) Luxe.physics.nape.space.zpp_inner.wrap_listeners.remove(this.interactionListener_end);
+		this.preListener_collision = null;
+		this.interactionListener_ongoing = null;
+		this.interactionListener_end = null;
 	}
 	,preOnGoing: function(cb) {
 		this.swapped = cb.zpp_inner.pre_swapped;
 		return cb.zpp_inner.pre_arbiter.wrapper().get_collisionArbiter().get_state();
 	}
 	,checkAbriter: function(arbiter) {
-		var _g = this;
 		var colArb;
 		if(arbiter.zpp_inner.type == zpp_$nape_dynamics_ZPP_$Arbiter.COL) colArb = arbiter.zpp_inner.colarb.outer_zn; else colArb = null;
-		var body1;
-		if(!colArb.zpp_inner.active) throw new js__$Boot_HaxeError("Error: Arbiter not currently in use");
-		if(colArb.zpp_inner.ws1.id > colArb.zpp_inner.ws2.id) body1 = colArb.zpp_inner.b2.outer; else body1 = colArb.zpp_inner.b1.outer;
-		var body2;
-		if(!colArb.zpp_inner.active) throw new js__$Boot_HaxeError("Error: Arbiter not currently in use");
-		if(colArb.zpp_inner.ws1.id > colArb.zpp_inner.ws2.id) body2 = colArb.zpp_inner.b1.outer; else body2 = colArb.zpp_inner.b2.outer;
-		var arbiters;
-		if(this.swapped) {
-			if(body2.zpp_inner.wrap_arbiters == null) body2.zpp_inner.wrap_arbiters = zpp_$nape_util_ZPP_$ArbiterList.get(body2.zpp_inner.arbiters,true);
-			arbiters = body2.zpp_inner.wrap_arbiters;
+		if(!this.swapped) {
+			if(((function($this) {
+				var $r;
+				if(!colArb.zpp_inner.active) throw new js__$Boot_HaxeError("Error: Arbiter not currently in use");
+				if(colArb.zpp_inner.colarb.wrap_normal == null) colArb.zpp_inner.colarb.getnormal();
+				$r = colArb.zpp_inner.colarb.wrap_normal;
+				return $r;
+			}(this))).get_y() == 1) this.touching |= 4;
+			if(((function($this) {
+				var $r;
+				if(!colArb.zpp_inner.active) throw new js__$Boot_HaxeError("Error: Arbiter not currently in use");
+				if(colArb.zpp_inner.colarb.wrap_normal == null) colArb.zpp_inner.colarb.getnormal();
+				$r = colArb.zpp_inner.colarb.wrap_normal;
+				return $r;
+			}(this))).get_x() == 1) this.touching |= 8;
+			if(((function($this) {
+				var $r;
+				if(!colArb.zpp_inner.active) throw new js__$Boot_HaxeError("Error: Arbiter not currently in use");
+				if(colArb.zpp_inner.colarb.wrap_normal == null) colArb.zpp_inner.colarb.getnormal();
+				$r = colArb.zpp_inner.colarb.wrap_normal;
+				return $r;
+			}(this))).get_y() == -1) this.touching |= 1;
+			if(((function($this) {
+				var $r;
+				if(!colArb.zpp_inner.active) throw new js__$Boot_HaxeError("Error: Arbiter not currently in use");
+				if(colArb.zpp_inner.colarb.wrap_normal == null) colArb.zpp_inner.colarb.getnormal();
+				$r = colArb.zpp_inner.colarb.wrap_normal;
+				return $r;
+			}(this))).get_x() == -1) this.touching |= 2;
 		} else {
-			if(body1.zpp_inner.wrap_arbiters == null) body1.zpp_inner.wrap_arbiters = zpp_$nape_util_ZPP_$ArbiterList.get(body1.zpp_inner.arbiters,true);
-			arbiters = body1.zpp_inner.wrap_arbiters;
+			if(((function($this) {
+				var $r;
+				if(!colArb.zpp_inner.active) throw new js__$Boot_HaxeError("Error: Arbiter not currently in use");
+				if(colArb.zpp_inner.colarb.wrap_normal == null) colArb.zpp_inner.colarb.getnormal();
+				$r = colArb.zpp_inner.colarb.wrap_normal;
+				return $r;
+			}(this))).get_y() == -1) this.touching |= 4;
+			if(((function($this) {
+				var $r;
+				if(!colArb.zpp_inner.active) throw new js__$Boot_HaxeError("Error: Arbiter not currently in use");
+				if(colArb.zpp_inner.colarb.wrap_normal == null) colArb.zpp_inner.colarb.getnormal();
+				$r = colArb.zpp_inner.colarb.wrap_normal;
+				return $r;
+			}(this))).get_x() == -1) this.touching |= 8;
+			if(((function($this) {
+				var $r;
+				if(!colArb.zpp_inner.active) throw new js__$Boot_HaxeError("Error: Arbiter not currently in use");
+				if(colArb.zpp_inner.colarb.wrap_normal == null) colArb.zpp_inner.colarb.getnormal();
+				$r = colArb.zpp_inner.colarb.wrap_normal;
+				return $r;
+			}(this))).get_y() == 1) this.touching |= 1;
+			if(((function($this) {
+				var $r;
+				if(!colArb.zpp_inner.active) throw new js__$Boot_HaxeError("Error: Arbiter not currently in use");
+				if(colArb.zpp_inner.colarb.wrap_normal == null) colArb.zpp_inner.colarb.getnormal();
+				$r = colArb.zpp_inner.colarb.wrap_normal;
+				return $r;
+			}(this))).get_x() == 1) this.touching |= 2;
 		}
-		arbiters.foreach(function(obj) {
-			if(obj.get_state() == (function($this) {
-				var $r;
-				if(zpp_$nape_util_ZPP_$Flags.PreFlag_IGNORE == null) {
-					zpp_$nape_util_ZPP_$Flags.internal = true;
-					zpp_$nape_util_ZPP_$Flags.PreFlag_IGNORE = new nape_callbacks_PreFlag();
-					zpp_$nape_util_ZPP_$Flags.internal = false;
-				}
-				$r = zpp_$nape_util_ZPP_$Flags.PreFlag_IGNORE;
-				return $r;
-			}(this)) || obj.get_state() == (function($this) {
-				var $r;
-				if(zpp_$nape_util_ZPP_$Flags.PreFlag_IGNORE_ONCE == null) {
-					zpp_$nape_util_ZPP_$Flags.internal = true;
-					zpp_$nape_util_ZPP_$Flags.PreFlag_IGNORE_ONCE = new nape_callbacks_PreFlag();
-					zpp_$nape_util_ZPP_$Flags.internal = false;
-				}
-				$r = zpp_$nape_util_ZPP_$Flags.PreFlag_IGNORE_ONCE;
-				return $r;
-			}(this))) return null;
-			if(!_g.swapped) {
-				if((obj.zpp_inner.type == zpp_$nape_dynamics_ZPP_$Arbiter.COL?obj.zpp_inner.colarb.outer_zn:null).get_normal().get_y() == 1) _g.touching |= 4;
-				if((obj.zpp_inner.type == zpp_$nape_dynamics_ZPP_$Arbiter.COL?obj.zpp_inner.colarb.outer_zn:null).get_normal().get_x() == 1) _g.touching |= 8;
-				if((obj.zpp_inner.type == zpp_$nape_dynamics_ZPP_$Arbiter.COL?obj.zpp_inner.colarb.outer_zn:null).get_normal().get_y() == -1) _g.touching |= 1;
-				if((obj.zpp_inner.type == zpp_$nape_dynamics_ZPP_$Arbiter.COL?obj.zpp_inner.colarb.outer_zn:null).get_normal().get_x() == -1) _g.touching |= 2;
-			} else {
-				if((obj.zpp_inner.type == zpp_$nape_dynamics_ZPP_$Arbiter.COL?obj.zpp_inner.colarb.outer_zn:null).get_normal().get_y() == 1) _g.touching |= 1;
-				if((obj.zpp_inner.type == zpp_$nape_dynamics_ZPP_$Arbiter.COL?obj.zpp_inner.colarb.outer_zn:null).get_normal().get_x() == 1) _g.touching |= 2;
-				if((obj.zpp_inner.type == zpp_$nape_dynamics_ZPP_$Arbiter.COL?obj.zpp_inner.colarb.outer_zn:null).get_normal().get_y() == -1) _g.touching |= 4;
-				if((obj.zpp_inner.type == zpp_$nape_dynamics_ZPP_$Arbiter.COL?obj.zpp_inner.colarb.outer_zn:null).get_normal().get_x() == -1) _g.touching |= 8;
-			}
-		});
 	}
 	,checkContacts: function(arbiters) {
 		var _g = this;
@@ -2008,9 +2042,6 @@ components_TouchingChecker.prototype = $extend(luxe_Component.prototype,{
 	}
 	,ondestroy: function() {
 		luxe_Component.prototype.ondestroy.call(this);
-	}
-	,onremoved: function() {
-		luxe_Component.prototype.onremoved.call(this);
 	}
 	,__class__: components_TouchingChecker
 });
@@ -2407,7 +2438,7 @@ luxe_Entity.prototype = $extend(luxe_Objects.prototype,{
 			var _parent = this.get_parent();
 			while(looking) if(_parent.get_scene() == null) {
 				if(_parent.get_parent() == null) {
-					if(!_from_unlisten) haxe_Log.trace("   i / entity / " + "entity has no parent or scene, currently no core events will reach it.",{ fileName : "Entity.hx", lineNumber : 497, className : "luxe.Entity", methodName : "_find_emit_source"});
+					if(!_from_unlisten) null;
 					looking = false;
 					break;
 				} else _parent = _parent.get_parent();
@@ -2416,7 +2447,7 @@ luxe_Entity.prototype = $extend(luxe_Objects.prototype,{
 				looking = false;
 				break;
 			}
-		} else if(!_from_unlisten) haxe_Log.trace("   i / entity / " + "entity has no parent or scene, currently no core events will reach it.",{ fileName : "Entity.hx", lineNumber : 519, className : "luxe.Entity", methodName : "_find_emit_source"});
+		} else if(!_from_unlisten) null;
 		return source;
 	}
 	,_listen: function(_event,_handler,_self) {
@@ -2850,7 +2881,7 @@ luxe_Entity.prototype = $extend(luxe_Objects.prototype,{
 		if(_scene != null) {
 			var key = this.get_name();
 			_scene.entities.remove(key);
-			if(_scene.entities.exists(_name)) haxe_Log.trace("    i / scene / " + ("" + _scene.get_name() + " / adding a second entity named " + _name + "!\n                This will replace the existing one, possibly leaving the previous one in limbo."),{ fileName : "Scene.hx", lineNumber : 91, className : "luxe.Scene", methodName : "handle_duplicate_warning"});
+			if(_scene.entities.exists(_name)) null;
 			_scene.entities.set(_name,this);
 			_scene._has_changed = true;
 		}
@@ -6155,7 +6186,6 @@ luxe_Core.prototype = $extend(snow_App.prototype,{
 		var _g = this;
 		Luxe.version = haxe_Resource.getString("version");
 		Luxe.build = Luxe.version + haxe_Resource.getString("build");
-		haxe_Log.trace("     i / luxe / " + ("" + Luxe.build + " / debug:" + Std.string(this.app.debug) + " / os:" + this.app.os + " / platform:" + this.app.platform),{ fileName : "Core.hx", lineNumber : 112, className : "luxe.Core", methodName : "ready"});
 		this.headless = this.app.window == null;
 		if(!this.headless) {
 			var _font_name = "default.png";
@@ -6166,14 +6196,12 @@ luxe_Core.prototype = $extend(snow_App.prototype,{
 			_font_load.then(function(asset) {
 				_g.init(asset);
 			}).error(function(error) {
-				haxe_Log.trace("     i / luxe / " + "failed to load default font, things will probably not look right... $error",{ fileName : "Core.hx", lineNumber : 133, className : "luxe.Core", methodName : "ready"});
 				_g.init(null);
 			});
 		} else this.init(null);
 	}
 	,ondestroy: function() {
 		this.shutting_down = true;
-		haxe_Log.trace("     i / luxe / " + "shutting down...",{ fileName : "Core.hx", lineNumber : 151, className : "luxe.Core", methodName : "ondestroy"});
 		this.game.ondestroy();
 		this.emitter.emit(8);
 		if(this.renderer != null) this.renderer.destroy();
@@ -6191,7 +6219,7 @@ luxe_Core.prototype = $extend(snow_App.prototype,{
 		this.debug = null;
 		Luxe.utils = null;
 		this.has_shutdown = true;
-		haxe_Log.trace("     i / luxe / " + "goodbye.",{ fileName : "Core.hx", lineNumber : 183, className : "luxe.Core", methodName : "ondestroy"});
+		null;
 	}
 	,init: function(asset) {
 		Luxe.debug = this.debug = new luxe_Debug(this);
@@ -6240,9 +6268,7 @@ luxe_Core.prototype = $extend(snow_App.prototype,{
 	}
 	,internal_pre_ready: function() {
 		if(!this.headless) {
-			haxe_Log.trace("     i / luxe / " + ("opengl " + snow_modules_opengl_web_GL.versionString()),{ fileName : "Core.hx", lineNumber : 276, className : "luxe.Core", methodName : "internal_pre_ready"});
 			var default_parcel = new luxe_Parcel({ id : "default_parcel", system : this.resources, bytes : this.appconfig.preload.bytes, texts : this.appconfig.preload.texts, jsons : this.appconfig.preload.jsons, textures : this.appconfig.preload.textures, fonts : this.appconfig.preload.fonts, shaders : this.appconfig.preload.shaders, sounds : this.appconfig.preload.sounds, oncomplete : $bind(this,this.internal_ready), onfailed : function(_error) {
-				haxe_Log.trace("     i / luxe / " + "config / preload / failed to load",{ fileName : "Core.hx", lineNumber : 293, className : "luxe.Core", methodName : "internal_pre_ready"});
 				throw new js__$Boot_HaxeError(snow_types_Error.error(_error));
 			}});
 			default_parcel.load();
@@ -6352,24 +6378,6 @@ luxe_Core.prototype = $extend(snow_App.prototype,{
 			this.emitter.emit(11);
 			this.game.onpostrender();
 			this.debug.end(luxe_Tag.render);
-			var _batch = this.debug.batcher;
-			if(_batch.enabled) {
-				this.debug.start(luxe_Tag.debug_batch);
-				_batch.draw_calls = 0;
-				_batch.vert_count = 0;
-				_batch.emitter.emit(1,_batch);
-				_batch.view.process();
-				_batch.renderer.state.viewport(_batch.view.get_viewport().x,_batch.view.get_viewport().y,_batch.view.get_viewport().w,_batch.view.get_viewport().h);
-				_batch.batch(false);
-				_batch.emitter.emit(2,_batch);
-				this.renderer.stats.geometry_count += _batch.geometry.size();
-				this.renderer.stats.dynamic_batched_count += _batch.dynamic_batched_count;
-				this.renderer.stats.static_batched_count += _batch.static_batched_count;
-				this.renderer.stats.visible_count += _batch.visible_count;
-				this.renderer.stats.draw_calls += _batch.draw_calls;
-				this.renderer.stats.vert_count += _batch.vert_count;
-				this.debug.end(luxe_Tag.debug_batch);
-			}
 		}
 	}
 	,show_console: function(_show) {
@@ -6589,11 +6597,6 @@ luxe_Debug.prototype = {
 	init: function() {
 		luxe_Debug.trace_callbacks = new haxe_ds_StringMap();
 		luxe_Debug.views = [];
-		luxe_Debug.views.push(new luxe_debug_TraceDebugView());
-		luxe_Debug.views.push(new luxe_debug_StatsDebugView());
-		luxe_Debug.views.push(new luxe_debug_ProfilerDebugView());
-		luxe_Debug.views.push(new luxe_debug_SceneDebugView());
-		this.current_view = luxe_Debug.views[0];
 		haxe_Log.trace = luxe_Debug.internal_trace;
 		null;
 	}
@@ -6608,10 +6611,8 @@ luxe_Debug.prototype = {
 		return null;
 	}
 	,start: function(_name,_max) {
-		if(!this.core.headless) luxe_debug_ProfilerDebugView.start(_name,_max);
 	}
 	,end: function(_name) {
-		if(!this.core.headless) luxe_debug_ProfilerDebugView.end(_name);
 	}
 	,remove_trace_listener: function(_name) {
 		luxe_Debug.trace_callbacks.remove(_name);
@@ -6620,46 +6621,6 @@ luxe_Debug.prototype = {
 		luxe_Debug.trace_callbacks.set(_name,_callback);
 	}
 	,create_debug_console: function() {
-		var _g = this;
-		this.core.emitter.on(13,$bind(this,this.keyup));
-		this.core.emitter.on(12,$bind(this,this.keydown));
-		this.core.emitter.on(18,$bind(this,this.mouseup));
-		this.core.emitter.on(17,$bind(this,this.mousedown));
-		this.core.emitter.on(19,$bind(this,this.mousemove));
-		this.core.emitter.on(20,$bind(this,this.mousewheel));
-		this.batcher = new phoenix_Batcher(Luxe.renderer,"debug_batcher");
-		this.view = new phoenix_Camera({ camera_name : "debug_batcher_camera"});
-		this.batcher.view = this.view;
-		this.batcher.set_layer(999);
-		this.overlay = new phoenix_geometry_QuadGeometry({ id : "debug.overlay", x : 0, y : 0, w : Luxe.core.screen.get_w(), h : Luxe.core.screen.get_h(), color : new phoenix_Color(0,0,0,0.8), depth : 999, visible : false, batcher : this.batcher});
-		this.overlay.set_locked(true);
-		this.padding = new phoenix_Vector(Luxe.core.screen.get_w() * 0.05,Luxe.core.screen.get_h() * 0.05);
-		this.inspector = new luxe_debug_Inspector({ pos : new phoenix_Vector(this.padding.x,this.padding.y), size : new phoenix_Vector(Luxe.core.screen.get_w() - this.padding.x * 2,Luxe.core.screen.get_h() - this.padding.y * 2), batcher : this.batcher});
-		this.inspector.onrefresh = $bind(this,this.refresh);
-		this.core.emitter.on(31,function(_event) {
-			var _w = _event.event.x;
-			var _h = _event.event.y;
-			_g.padding.set_xy(_w * 0.05,_h * 0.05);
-			_g.overlay.resize_xy(_w,_h);
-			_g.view.set_viewport(new phoenix_Rectangle(0,0,_w,_h));
-			_g.inspector.set_size(new phoenix_Vector(_w - _g.padding.x * 2,_h - _g.padding.y * 2));
-			_g.inspector.set_pos(new phoenix_Vector(_g.padding.x,_g.padding.y));
-			var _g1 = 0;
-			var _g2 = luxe_Debug.views;
-			while(_g1 < _g2.length) {
-				var view = _g2[_g1];
-				++_g1;
-				view.onwindowsized(_event);
-			}
-		});
-		this.batcher.enabled = false;
-		var _g3 = 0;
-		var _g11 = luxe_Debug.views;
-		while(_g3 < _g11.length) {
-			var view1 = _g11[_g3];
-			++_g3;
-			view1.create();
-		}
 	}
 	,mouseup: function(e) {
 		if(this.visible) {
@@ -6741,6 +6702,7 @@ luxe_Debug.prototype = {
 	}
 	,show_console: function(_show) {
 		if(_show == null) _show = true;
+		return;
 		if(_show) {
 			this.last_cursor_shown = Luxe.core.screen.cursor.get_visible();
 			this.last_cursor_grab = Luxe.core.screen.cursor.get_grab();
@@ -7750,10 +7712,7 @@ luxe_Parcel.prototype = {
 							})());
 						};
 					})(_bytes));
-				} else {
-					haxe_Log.trace("   i / parcel / " + ("" + _g.id + " / already had " + _bytes[0].id + " loaded, skipped"),{ fileName : "Parcel.hx", lineNumber : 195, className : "luxe.Parcel", methodName : "load"});
-					_g.one_loaded(_bytes[0].id,_load_id,_g.system.cache.get(_bytes[0].id),++_index,_g.list.bytes.length + _g.list.texts.length + _g.list.jsons.length + _g.list.textures.length + _g.list.shaders.length + _g.list.fonts.length + _g.list.sounds.length);
-				}
+				} else _g.one_loaded(_bytes[0].id,_load_id,_g.system.cache.get(_bytes[0].id),++_index,_g.list.bytes.length + _g.list.texts.length + _g.list.jsons.length + _g.list.textures.length + _g.list.shaders.length + _g.list.fonts.length + _g.list.sounds.length);
 			}
 			var _g11 = 0;
 			var _g21 = _g.list.texts;
@@ -7777,10 +7736,7 @@ luxe_Parcel.prototype = {
 							})());
 						};
 					})(_text));
-				} else {
-					haxe_Log.trace("   i / parcel / " + ("" + _g.id + " / already had " + _text[0].id + " loaded, skipped"),{ fileName : "Parcel.hx", lineNumber : 215, className : "luxe.Parcel", methodName : "load"});
-					_g.one_loaded(_text[0].id,_load_id,_g.system.cache.get(_text[0].id),++_index,_g.list.bytes.length + _g.list.texts.length + _g.list.jsons.length + _g.list.textures.length + _g.list.shaders.length + _g.list.fonts.length + _g.list.sounds.length);
-				}
+				} else _g.one_loaded(_text[0].id,_load_id,_g.system.cache.get(_text[0].id),++_index,_g.list.bytes.length + _g.list.texts.length + _g.list.jsons.length + _g.list.textures.length + _g.list.shaders.length + _g.list.fonts.length + _g.list.sounds.length);
 			}
 			var _g12 = 0;
 			var _g22 = _g.list.jsons;
@@ -7804,10 +7760,7 @@ luxe_Parcel.prototype = {
 							})());
 						};
 					})(_json));
-				} else {
-					haxe_Log.trace("   i / parcel / " + ("" + _g.id + " / already had " + _json[0].id + " loaded, skipped"),{ fileName : "Parcel.hx", lineNumber : 235, className : "luxe.Parcel", methodName : "load"});
-					_g.one_loaded(_json[0].id,_load_id,_g.system.cache.get(_json[0].id),++_index,_g.list.bytes.length + _g.list.texts.length + _g.list.jsons.length + _g.list.textures.length + _g.list.shaders.length + _g.list.fonts.length + _g.list.sounds.length);
-				}
+				} else _g.one_loaded(_json[0].id,_load_id,_g.system.cache.get(_json[0].id),++_index,_g.list.bytes.length + _g.list.texts.length + _g.list.jsons.length + _g.list.textures.length + _g.list.shaders.length + _g.list.fonts.length + _g.list.sounds.length);
 			}
 			var _g13 = 0;
 			var _g23 = _g.list.textures;
@@ -7831,10 +7784,7 @@ luxe_Parcel.prototype = {
 							})());
 						};
 					})(_texture));
-				} else {
-					haxe_Log.trace("   i / parcel / " + ("" + _g.id + " / already had " + _texture[0].id + " loaded, skipped"),{ fileName : "Parcel.hx", lineNumber : 263, className : "luxe.Parcel", methodName : "load"});
-					_g.one_loaded(_texture[0].id,_load_id,_g.system.cache.get(_texture[0].id),++_index,_g.list.bytes.length + _g.list.texts.length + _g.list.jsons.length + _g.list.textures.length + _g.list.shaders.length + _g.list.fonts.length + _g.list.sounds.length);
-				}
+				} else _g.one_loaded(_texture[0].id,_load_id,_g.system.cache.get(_texture[0].id),++_index,_g.list.bytes.length + _g.list.texts.length + _g.list.jsons.length + _g.list.textures.length + _g.list.shaders.length + _g.list.fonts.length + _g.list.sounds.length);
 			}
 			var _g14 = 0;
 			var _g24 = _g.list.fonts;
@@ -7858,10 +7808,7 @@ luxe_Parcel.prototype = {
 							})());
 						};
 					})(_font));
-				} else {
-					haxe_Log.trace("   i / parcel / " + ("" + _g.id + " / already had " + _font[0].id + " loaded, skipped"),{ fileName : "Parcel.hx", lineNumber : 287, className : "luxe.Parcel", methodName : "load"});
-					_g.one_loaded(_font[0].id,_load_id,_g.system.cache.get(_font[0].id),++_index,_g.list.bytes.length + _g.list.texts.length + _g.list.jsons.length + _g.list.textures.length + _g.list.shaders.length + _g.list.fonts.length + _g.list.sounds.length);
-				}
+				} else _g.one_loaded(_font[0].id,_load_id,_g.system.cache.get(_font[0].id),++_index,_g.list.bytes.length + _g.list.texts.length + _g.list.jsons.length + _g.list.textures.length + _g.list.shaders.length + _g.list.fonts.length + _g.list.sounds.length);
 			}
 			var _g15 = 0;
 			var _g25 = _g.list.shaders;
@@ -7885,10 +7832,7 @@ luxe_Parcel.prototype = {
 							})());
 						};
 					})(_shader));
-				} else {
-					haxe_Log.trace("   i / parcel / " + ("" + _g.id + " / already had " + _shader[0].id + " loaded, skipped"),{ fileName : "Parcel.hx", lineNumber : 312, className : "luxe.Parcel", methodName : "load"});
-					_g.one_loaded(_shader[0].id,_load_id,_g.system.cache.get(_shader[0].id),++_index,_g.list.bytes.length + _g.list.texts.length + _g.list.jsons.length + _g.list.textures.length + _g.list.shaders.length + _g.list.fonts.length + _g.list.sounds.length);
-				}
+				} else _g.one_loaded(_shader[0].id,_load_id,_g.system.cache.get(_shader[0].id),++_index,_g.list.bytes.length + _g.list.texts.length + _g.list.jsons.length + _g.list.textures.length + _g.list.shaders.length + _g.list.fonts.length + _g.list.sounds.length);
 			}
 			var _g16 = 0;
 			var _g26 = _g.list.sounds;
@@ -7908,10 +7852,7 @@ luxe_Parcel.prototype = {
 							};
 						})(_sound));
 					};
-				})(_sound)); else {
-					haxe_Log.trace("   i / parcel / " + ("" + _g.id + " / already had " + _sound[0].id + " (" + _sound[0].name + ") loaded, skipped"),{ fileName : "Parcel.hx", lineNumber : 342, className : "luxe.Parcel", methodName : "load"});
-					_g.one_loaded(_sound[0].id,_load_id,null,++_index,_g.list.bytes.length + _g.list.texts.length + _g.list.jsons.length + _g.list.textures.length + _g.list.shaders.length + _g.list.fonts.length + _g.list.sounds.length);
-				}
+				})(_sound)); else _g.one_loaded(_sound[0].id,_load_id,null,++_index,_g.list.bytes.length + _g.list.texts.length + _g.list.jsons.length + _g.list.textures.length + _g.list.shaders.length + _g.list.fonts.length + _g.list.sounds.length);
 			}
 		});
 	}
@@ -8741,7 +8682,7 @@ luxe_Scene.__name__ = ["luxe","Scene"];
 luxe_Scene.__super__ = luxe_Objects;
 luxe_Scene.prototype = $extend(luxe_Objects.prototype,{
 	handle_duplicate_warning: function(_name) {
-		if(this.entities.exists(_name)) haxe_Log.trace("    i / scene / " + ("" + this.get_name() + " / adding a second entity named " + _name + "!\n                This will replace the existing one, possibly leaving the previous one in limbo."),{ fileName : "Scene.hx", lineNumber : 91, className : "luxe.Scene", methodName : "handle_duplicate_warning"});
+		if(this.entities.exists(_name)) null;
 	}
 	,add: function(entity) {
 		if(entity == null) throw new js__$Boot_HaxeError(luxe_DebugError.null_assertion("entity was null" + (" ( " + "can't put entity in a scene if the entity is null." + " )")));
@@ -8762,10 +8703,7 @@ luxe_Scene.prototype = $extend(luxe_Objects.prototype,{
 			this.entity_count--;
 			var key = entity.get_name();
 			return this.entities.remove(key);
-		} else {
-			haxe_Log.trace("    i / scene / " + "can't remove the entity from this scene, it is not mine (entity.scene != this)",{ fileName : "Scene.hx", lineNumber : 140, className : "luxe.Scene", methodName : "remove"});
-			return false;
-		}
+		} else return false;
 		return false;
 	}
 	,get: function(_name) {
@@ -9286,10 +9224,7 @@ luxe_States.prototype = $extend(luxe_Objects.prototype,{
 		_state.onleave(_leave_with);
 	}
 	,set: function(name,_enter_with,_leave_with) {
-		if(!this._states.exists(name)) {
-			haxe_Log.trace("   i / states / " + ("cannot find state named " + name + ", is it added to this state machine?"),{ fileName : "States.hx", lineNumber : 317, className : "luxe.States", methodName : "set"});
-			return false;
-		}
+		if(!this._states.exists(name)) return false;
 		this.unset(_leave_with);
 		this.current_state = this._states.get(name);
 		this.enter(this.current_state,_enter_with);
@@ -9895,10 +9830,7 @@ $hxClasses["luxe.components.Components"] = luxe_components_Components;
 luxe_components_Components.__name__ = ["luxe","components","Components"];
 luxe_components_Components.prototype = {
 	add: function(_component) {
-		if(_component == null) {
-			haxe_Log.trace("attempt to add null component to " + this.entity.get_name(),{ fileName : "Components.hx", lineNumber : 28, className : "luxe.components.Components", methodName : "add"});
-			return _component;
-		}
+		if(_component == null) return _component;
 		_component.set_entity(this.entity);
 		this.components.set(_component.name,_component);
 		_component.onadded();
@@ -9907,10 +9839,7 @@ luxe_components_Components.prototype = {
 		return _component;
 	}
 	,remove: function(_name) {
-		if(!this.components.map.exists(_name)) {
-			haxe_Log.trace("attempt to remove " + _name + " from " + this.entity.get_name() + " failed because that component was not attached to this entity",{ fileName : "Components.hx", lineNumber : 61, className : "luxe.components.Components", methodName : "remove"});
-			return false;
-		}
+		if(!this.components.map.exists(_name)) return false;
 		var _component = this.components.map.get(_name);
 		_component.onremoved();
 		_component.set_entity(null);
@@ -10010,7 +9939,7 @@ luxe_components_sprite_SpriteAnimation.prototype = $extend(luxe_Component.protot
 				_anim.from_json(animdata);
 				this.animations.set(anim,_anim);
 			}
-		} else haxe_Log.trace("i / spriteanimation / " + ("" + this.get_entity().get_name() + " / add_from_json_object given an empty json object... This is probably an error."),{ fileName : "SpriteAnimation.hx", lineNumber : 132, className : "luxe.components.sprite.SpriteAnimation", methodName : "add_from_json_object"});
+		} else null;
 	}
 	,add_from_json: function(_json_string) {
 		var _json_object = JSON.parse(_json_string);
@@ -10037,7 +9966,7 @@ luxe_components_sprite_SpriteAnimation.prototype = $extend(luxe_Component.protot
 					null;
 				}
 			}
-		} else haxe_Log.trace("i / spriteanimation / " + ("" + this.get_entity().get_name() + " / " + this.animation + " requested an event to be added, but that animation is not found in the `" + this.name + "` component"),{ fileName : "SpriteAnimation.hx", lineNumber : 176, className : "luxe.components.sprite.SpriteAnimation", methodName : "remove_event"});
+		} else null;
 	}
 	,remove_events: function(_animation,_image_frame) {
 		if(this.animations.exists(_animation)) {
@@ -10049,7 +9978,7 @@ luxe_components_sprite_SpriteAnimation.prototype = $extend(luxe_Component.protot
 				++_g;
 				if(_anim_frame.image_frame == _image_frame) _anim_frame.events = [];
 			}
-		} else haxe_Log.trace("i / spriteanimation / " + ("" + this.get_entity().get_name() + " / " + this.animation + " requested an event to be removed, but that animation is not found in the `" + this.name + "` component"),{ fileName : "SpriteAnimation.hx", lineNumber : 193, className : "luxe.components.sprite.SpriteAnimation", methodName : "remove_events"});
+		} else null;
 	}
 	,add_event: function(_animation,_image_frame,_event) {
 		if(_event == null) _event = "";
@@ -10078,7 +10007,7 @@ luxe_components_sprite_SpriteAnimation.prototype = $extend(luxe_Component.protot
 					}
 				}
 			}
-		} else haxe_Log.trace("i / spriteanimation / " + ("" + this.get_entity().get_name() + " / " + this.animation + " requested an event to be added, but that animation is not found in the `" + this.name + "` component"),{ fileName : "SpriteAnimation.hx", lineNumber : 233, className : "luxe.components.sprite.SpriteAnimation", methodName : "add_event"});
+		} else null;
 	}
 	,update: function(dt) {
 		if(this.current == null) return;
@@ -10155,10 +10084,7 @@ luxe_components_sprite_SpriteAnimation.prototype = $extend(luxe_Component.protot
 		return this.animation;
 	}
 	,set_animation: function(_name) {
-		if(!this.animations.exists(_name)) {
-			haxe_Log.trace("i / spriteanimation / " + ("" + this.get_entity().get_name() + " / set animation `" + _name + "`, but that animation is not found in the `" + this.name + "` component"),{ fileName : "SpriteAnimation.hx", lineNumber : 416, className : "luxe.components.sprite.SpriteAnimation", methodName : "set_animation"});
-			return this.animation;
-		}
+		if(!this.animations.exists(_name)) return this.animation;
 		this.current = this.animations.get(_name);
 		this.loop = this.current.loop;
 		this.pingpong = this.current.pingpong;
@@ -10939,10 +10865,7 @@ luxe_debug_ProfilerDebugView.__name__ = ["luxe","debug","ProfilerDebugView"];
 luxe_debug_ProfilerDebugView.add_offset = function(_id,_offset) {
 	var _item = luxe_debug_ProfilerDebugView.lists.get(_id);
 	var _offsetitem = luxe_debug_ProfilerDebugView.lists.get(_offset);
-	if(_item != null && _offsetitem != null) _item.offsets.push(_offsetitem); else {
-		haxe_Log.trace("not found for " + _id + " or " + _offset,{ fileName : "ProfilerDebugView.hx", lineNumber : 158, className : "luxe.debug.ProfilerDebugView", methodName : "add_offset"});
-		haxe_Log.trace(Std.string(_item) + " / " + Std.string(_offsetitem),{ fileName : "ProfilerDebugView.hx", lineNumber : 159, className : "luxe.debug.ProfilerDebugView", methodName : "add_offset"});
-	}
+	if(_item != null && _offsetitem != null) _item.offsets.push(_offsetitem); else null;
 };
 luxe_debug_ProfilerDebugView.hide_item = function(_id) {
 	var _item = luxe_debug_ProfilerDebugView.lists.get(_id);
@@ -12093,7 +12016,7 @@ luxe_importers_tiled_TiledMapData.prototype = {
 				switch(_g) {
 				case "tileset":
 					var tileset = new luxe_importers_tiled_TiledTileset();
-					if(child.get("source") != null) haxe_Log.trace("tilesets from other sources are not available right now? " + child.get("source"),{ fileName : "TiledMapData.hx", lineNumber : 81, className : "luxe.importers.tiled.TiledMapData", methodName : "parseFromXML"}); else tileset.from_xml(child);
+					if(child.get("source") != null) null; else tileset.from_xml(child);
 					tileset.first_id = Std.parseInt(child.get("firstgid"));
 					this.tilesets.push(tileset);
 					break;
@@ -14495,15 +14418,12 @@ luxe_tilemaps_TilemapVisual.prototype = {
 		}
 	}
 	,geometry_for_tile: function(_layer,x,y) {
-		if(!this.geometry.exists(_layer)) {
-			haxe_Log.trace("  i / tilemap / " + ("visual / geometry_for_layer / " + _layer + " does not exist in tilemap visual"),{ fileName : "Tilemap.hx", lineNumber : 47, className : "luxe.tilemaps.TilemapVisual", methodName : "geometry_for_tile"});
-			return null;
-		}
+		if(!this.geometry.exists(_layer)) return null;
 		var geomlayer = this.geometry_for_layer(_layer);
 		return geomlayer[y][x];
 	}
 	,geometry_for_layer: function(_layer) {
-		if(!this.geometry.exists(_layer)) haxe_Log.trace("  i / tilemap / " + ("visual / geometry_for_layer / " + _layer + " does not exist in tilemap visual"),{ fileName : "Tilemap.hx", lineNumber : 60, className : "luxe.tilemaps.TilemapVisual", methodName : "geometry_for_layer"});
+		if(!this.geometry.exists(_layer)) null;
 		return this.geometry.get(_layer);
 	}
 	,default_options: function() {
@@ -14542,8 +14462,8 @@ luxe_tilemaps_TilemapVisual.prototype = {
 					_geom = null;
 					_geom_layer[_y][_x] = null;
 				} else this.update_tile_id(_geom,_layer_name,_x,_y,_id,_flipx,_flipy,_angle);
-			} else haxe_Log.trace("cannot refresh tile " + _x + "," + _y + " because the coords were out of the map width/height : " + _layer_name + " and " + this.map.width + "," + this.map.height,{ fileName : "Tilemap.hx", lineNumber : 138, className : "luxe.tilemaps.TilemapVisual", methodName : "refresh_tile_id"});
-		} else haxe_Log.trace("cannot refresh tile " + _x + "," + _y + " because layer was not found : " + _layer_name,{ fileName : "Tilemap.hx", lineNumber : 142, className : "luxe.tilemaps.TilemapVisual", methodName : "refresh_tile_id"});
+			} else null;
+		} else null;
 	}
 	,destroy: function() {
 		if(this.geometry != null) {
@@ -16123,7 +16043,7 @@ luxe_utils_Utils.prototype = {
 		} else if(Luxe.resources.cache.exists(_type2)) {
 			_sequence_type = _type2;
 			_pattern_regex = _type2_re;
-		} else haxe_Log.trace("Sequence requested from " + _name + " but no assets found like `" + _type0 + "` or `" + _type1 + "` or `" + _type2 + "`",{ fileName : "Utils.hx", lineNumber : 170, className : "luxe.utils.Utils", methodName : "find_assets_sequence"});
+		} else null;
 		if(_sequence_type != "") {
 			var $it0 = this.core.resources.cache.iterator();
 			while( $it0.hasNext() ) {
@@ -32782,6 +32702,8 @@ var objects_LaserSides = function(x,y) {
 	this.body = this.physics.body;
 	this.core = this.physics.core;
 	this.core.set_sensorEnabled(true);
+	this.core.zpp_inner.filter.wrapper().set_collisionGroup(3);
+	this.core.zpp_inner.filter.wrapper().set_collisionMask(-5);
 	this.body.get_position().set_x(this.get_pos().x);
 	this.body.get_position().set_y(this.get_pos().y);
 	Luxe.physics.nape.space.zpp_inner.wrap_listeners.add(new nape_callbacks_InteractionListener((function($this) {
@@ -32834,9 +32756,7 @@ objects_LaserSides.prototype = $extend(engine_Sprite.prototype,{
 		}
 	}
 	,ondestroy: function() {
-		if(this.geometry != null) this.geometry.drop(true);
 		engine_Sprite.prototype.ondestroy.call(this);
-		states_Game.drawer.remove(this.body);
 		if(this.body != null) Luxe.physics.nape.space.zpp_inner.wrap_bodies.remove(this.body);
 		this.body = null;
 		this.core = null;
@@ -32928,9 +32848,7 @@ objects_LaserUp.prototype = $extend(engine_Sprite.prototype,{
 		}
 	}
 	,ondestroy: function() {
-		if(this.geometry != null) this.geometry.drop(true);
 		engine_Sprite.prototype.ondestroy.call(this);
-		states_Game.drawer.remove(this.body);
 		if(this.body != null) Luxe.physics.nape.space.zpp_inner.wrap_bodies.remove(this.body);
 		this.body = null;
 		this.core = null;
@@ -32960,6 +32878,7 @@ var objects_Player = function(object,level) {
 	this.walkForce = 150;
 	var _g = this;
 	engine_Sprite.call(this,{ pos : new phoenix_Vector(level.pos.x + object.pos.x,level.pos.y + object.pos.y), texture : Luxe.resources.cache.get("assets/images/player.png"), name : object.name, depth : 3.4, size : new phoenix_Vector(16,16)});
+	objects_Player.public_position = new phoenix_Vector();
 	this.laserSides = new objects_LaserSides(this.get_pos().x,this.get_pos().y);
 	this.laserUp = new objects_LaserUp(this.get_pos().x,this.get_pos().y);
 	this.states = new objects_states_StateMachine();
@@ -32981,6 +32900,8 @@ var objects_Player = function(object,level) {
 	}(this)), types : [Main.types.Player,Main.types.Movable], polygon : nape_shape_Polygon.box(16,16), isBullet : true}));
 	this.body = this.physics.body;
 	this.core = this.physics.core;
+	this.core.zpp_inner.filter.wrapper().set_collisionGroup(5);
+	this.core.zpp_inner.filter.wrapper().set_collisionMask(-5);
 	Luxe.camera._components.get("follower",false).setFollower(this);
 	this.add(new components_TouchingChecker("player-floor",Main.types.Player,Main.types.Floor));
 	this.events.listen("player-floor_onBottom",function(_) {
@@ -33020,17 +32941,8 @@ objects_Player.__name__ = ["objects","Player"];
 objects_Player.__super__ = engine_Sprite;
 objects_Player.prototype = $extend(engine_Sprite.prototype,{
 	ondestroy: function() {
-		if(this.geometry != null) this.geometry.drop(true);
-		if(this._components.has("player-floor")) {
-			this.component_count--;
-			this._components.remove("player-floor");
-		}
 		engine_Sprite.prototype.ondestroy.call(this);
-		this.set_visible(false);
-		this.set_active(false);
-		if(this.body != null) Luxe.physics.nape.space.zpp_inner.wrap_bodies.remove(this.body);
-		this.body = null;
-		this.core = null;
+		this.states.set("none");
 		this.events.unlisten("player-floor_onBottom");
 		this.events.unlisten("player-floor_offBottom");
 		this.events.unlisten("player-floor_onSide");
@@ -33039,6 +32951,13 @@ objects_Player.prototype = $extend(engine_Sprite.prototype,{
 		this.events.unlisten("player-floor_offLeft");
 		this.events.unlisten("player-floor_onRight");
 		this.events.unlisten("player-floor_offRight");
+		this.laserSides.destroy();
+		this.laserSides = null;
+		this.laserUp.destroy();
+		this.laserUp = null;
+		if(this.body != null) Luxe.physics.nape.space.zpp_inner.wrap_bodies.remove(this.body);
+		this.body = null;
+		this.core = null;
 	}
 	,update: function(dt) {
 		engine_Sprite.prototype.update.call(this,dt);
@@ -33046,6 +32965,8 @@ objects_Player.prototype = $extend(engine_Sprite.prototype,{
 		this.get_pos().set_x(this.body.get_position().get_x());
 		this.get_pos().set_y(this.body.get_position().get_y());
 		this.set_pos(this.get_pos()["int"]());
+		objects_Player.public_position.set_x(this.get_pos().x);
+		objects_Player.public_position.set_y(this.get_pos().y);
 	}
 	,init: function() {
 		engine_Sprite.prototype.init.call(this);
@@ -33055,7 +32976,8 @@ objects_Player.prototype = $extend(engine_Sprite.prototype,{
 var objects_SpikeBlock = function(object,level) {
 	this.invencible = false;
 	var _g = this;
-	engine_Sprite.call(this,{ name : object.type, name_unique : true, pos : new phoenix_Vector(level.pos.x + object.pos.x + 8,level.pos.y + object.pos.y + 8), size : new phoenix_Vector(16,16), texture : Luxe.resources.cache.get("assets/images/spike_block.png"), depth : 3});
+	Level.spike_blockID++;
+	engine_Sprite.call(this,{ name : Std.string(object.type) + "." + Level.spike_blockID, name_unique : true, pos : new phoenix_Vector(level.pos.x + object.pos.x + 8,level.pos.y + object.pos.y + 8), size : new phoenix_Vector(16,16), texture : Luxe.resources.cache.get("assets/images/spike_block.png"), depth : 3});
 	if(Luxe.utils.random.bool(0.5)) {
 		this.set_texture(Luxe.resources.cache.get("assets/images/spike_block_2.png"));
 		this.invencible = true;
@@ -33092,7 +33014,6 @@ var objects_SpikeBlock = function(object,level) {
 	this.anim.set_animation("idle");
 	this.anim.play();
 	this.events.listen("animation.dead.end",function(_1) {
-		_g.set_visible(false);
 		_g.destroy();
 	});
 };
@@ -33108,24 +33029,11 @@ objects_SpikeBlock.prototype = $extend(engine_Sprite.prototype,{
 		}
 	}
 	,ondestroy: function() {
-		if(this.geometry != null) this.geometry.drop(true);
-		if(this._components.has("player-block")) {
-			this.component_count--;
-			this._components.remove("player-block");
-		}
-		if(this._components.has("block-floor")) {
-			this.component_count--;
-			this._components.remove("block-floor");
-		}
-		if(this._components.has("block-block")) {
-			this.component_count--;
-			this._components.remove("block-block");
-		}
+		this.states.set("none");
 		engine_Sprite.prototype.ondestroy.call(this);
 		if(this.body != null) Luxe.physics.nape.space.zpp_inner.wrap_bodies.remove(this.body);
 		this.body = null;
 		this.core = null;
-		this.states.set("none");
 	}
 	,update: function(dt) {
 		this.states.update(dt);
@@ -33238,7 +33146,7 @@ objects_states_player_Walk.__super__ = objects_states_player_Move;
 objects_states_player_Walk.prototype = $extend(objects_states_player_Move.prototype,{
 	update: function(dt) {
 		objects_states_player_Move.prototype.update.call(this,dt);
-		if(Luxe.input.inputpressed("jump")) this.machine.set("jump");
+		if(Luxe.input.inputpressed("jump") && this.player.onGround == true) this.machine.set("jump");
 		if(this.player.anim.animation != "walk" && this.player.anim.animation != "shoot") {
 			this.player.anim.set_animation("walk");
 			this.player.anim.play();
@@ -33466,22 +33374,9 @@ phoenix_BatchState.prototype = {
 	}
 	,str: function() {
 		if(!this.log) return;
-		haxe_Log.trace("\t+ BATCHSTATE LAST ",{ fileName : "BatchState.hx", lineNumber : 159, className : "phoenix.BatchState", methodName : "str"});
-		haxe_Log.trace("\t\tdepth - " + this.last_geom_state.depth,{ fileName : "BatchState.hx", lineNumber : 160, className : "phoenix.BatchState", methodName : "str"});
-		haxe_Log.trace("\t\ttexture - " + (this.last_geom_state.texture == null?"null":this.last_geom_state.texture.id),{ fileName : "BatchState.hx", lineNumber : 161, className : "phoenix.BatchState", methodName : "str"});
-		if(this.last_geom_state.texture != null) haxe_Log.trace("\t\t\t " + Std.string(this.last_geom_state.texture.texture),{ fileName : "BatchState.hx", lineNumber : 163, className : "phoenix.BatchState", methodName : "str"});
-		haxe_Log.trace("\t\tshader - " + (this.last_geom_state.shader == null?"null":this.last_geom_state.shader.id),{ fileName : "BatchState.hx", lineNumber : 165, className : "phoenix.BatchState", methodName : "str"});
-		haxe_Log.trace("\t\tprimitive_type - " + this.last_geom_state.primitive_type,{ fileName : "BatchState.hx", lineNumber : 166, className : "phoenix.BatchState", methodName : "str"});
-		haxe_Log.trace("\t\tclip - " + Std.string(this.last_geom_state.clip),{ fileName : "BatchState.hx", lineNumber : 167, className : "phoenix.BatchState", methodName : "str"});
-		haxe_Log.trace("\t- BATCHSTATE LAST",{ fileName : "BatchState.hx", lineNumber : 168, className : "phoenix.BatchState", methodName : "str"});
-		haxe_Log.trace("\t+ BATCHSTATE STATE",{ fileName : "BatchState.hx", lineNumber : 170, className : "phoenix.BatchState", methodName : "str"});
-		haxe_Log.trace("\t\tdepth - " + this.geom_state.depth,{ fileName : "BatchState.hx", lineNumber : 171, className : "phoenix.BatchState", methodName : "str"});
-		haxe_Log.trace("\t\ttexture - " + (this.geom_state.texture == null?"null":this.geom_state.texture.id),{ fileName : "BatchState.hx", lineNumber : 172, className : "phoenix.BatchState", methodName : "str"});
-		if(this.geom_state.texture != null) haxe_Log.trace("\t\t\t " + Std.string(this.geom_state.texture.texture),{ fileName : "BatchState.hx", lineNumber : 174, className : "phoenix.BatchState", methodName : "str"});
-		haxe_Log.trace("\t\tshader - " + (this.geom_state.shader == null?"null":this.geom_state.shader.id),{ fileName : "BatchState.hx", lineNumber : 176, className : "phoenix.BatchState", methodName : "str"});
-		haxe_Log.trace("\t\tprimitive_type - " + this.geom_state.primitive_type,{ fileName : "BatchState.hx", lineNumber : 177, className : "phoenix.BatchState", methodName : "str"});
-		haxe_Log.trace("\t\tclip - " + Std.string(this.geom_state.clip),{ fileName : "BatchState.hx", lineNumber : 178, className : "phoenix.BatchState", methodName : "str"});
-		haxe_Log.trace("\t- BATCHSTATE STATE",{ fileName : "BatchState.hx", lineNumber : 179, className : "phoenix.BatchState", methodName : "str"});
+		if(this.last_geom_state.texture != null) null;
+		if(this.geom_state.texture != null) null;
+		null;
 	}
 	,__class__: phoenix_BatchState
 };
@@ -35479,7 +35374,6 @@ phoenix_Matrix.prototype = {
 		te[15] = n12 * n23 * n31 - n13 * n22 * n31 + n13 * n21 * n32 - n11 * n23 * n32 - n12 * n21 * n33 + n11 * n22 * n33;
 		var det = me[0] * te[0] + me[1] * te[4] + me[2] * te[8] + me[3] * te[12];
 		if(det == 0) {
-			haxe_Log.trace("Matrix.getInverse: cant invert matrix, determinant is 0",{ fileName : "Matrix.hx", lineNumber : 696, className : "phoenix.Matrix", methodName : "getInverse"});
 			this.set(1,0,0,0,0,1,0,0,0,0,1,0,0,0,0,1);
 			this;
 			return this;
@@ -37620,11 +37514,11 @@ phoenix_Shader.prototype = $extend(luxe_resource_Resource.prototype,{
 		this.vert_shader = this.compile(35633,this.vert_source);
 		this.frag_shader = this.compile(35632,this.frag_source);
 		if(this.vert_shader == null || this.frag_shader == null) {
-			if(_g.log.length > 0) haxe_Log.trace("   i / shader / " + _g.log,{ fileName : "Shader.hx", lineNumber : 589, className : "phoenix.Shader", methodName : "from_string"});
+			if(_g.log.length > 0) null;
 			return false;
 		}
 		if(!this.link()) {
-			if(_g.log.length > 0) haxe_Log.trace("   i / shader / " + _g.log,{ fileName : "Shader.hx", lineNumber : 589, className : "phoenix.Shader", methodName : "from_string"});
+			if(_g.log.length > 0) null;
 			return false;
 		}
 		return true;
@@ -38241,7 +38135,6 @@ phoenix_geometry_Geometry.prototype = {
 	}
 	,str: function() {
 		if(!this.state.log) return;
-		haxe_Log.trace("\t\tgeometry ; " + this.id,{ fileName : "Geometry.hx", lineNumber : 219, className : "phoenix.geometry.Geometry", methodName : "str"});
 		this.state.log = true;
 		this.state.str();
 		this.state.log = false;
@@ -38777,15 +38670,8 @@ phoenix_geometry_GeometryState.prototype = {
 	}
 	,str: function() {
 		if(!this.log) return;
-		haxe_Log.trace("\t+ GEOMETRYSTATE " + Std.string(this.dirty),{ fileName : "GeometryState.hx", lineNumber : 64, className : "phoenix.geometry.GeometryState", methodName : "str"});
-		haxe_Log.trace("\t\tdepth - " + this.depth,{ fileName : "GeometryState.hx", lineNumber : 65, className : "phoenix.geometry.GeometryState", methodName : "str"});
-		haxe_Log.trace("\t\ttexture - " + (this.texture == null?"null":this.texture.id),{ fileName : "GeometryState.hx", lineNumber : 66, className : "phoenix.geometry.GeometryState", methodName : "str"});
-		if(this.texture != null) haxe_Log.trace("\t\t\t " + Std.string(this.texture.texture),{ fileName : "GeometryState.hx", lineNumber : 68, className : "phoenix.geometry.GeometryState", methodName : "str"});
-		haxe_Log.trace("\t\tshader - " + (this.shader == null?"null":this.shader.id),{ fileName : "GeometryState.hx", lineNumber : 70, className : "phoenix.geometry.GeometryState", methodName : "str"});
-		haxe_Log.trace("\t\tprimitive_type - " + this.primitive_type,{ fileName : "GeometryState.hx", lineNumber : 71, className : "phoenix.geometry.GeometryState", methodName : "str"});
-		haxe_Log.trace("\t\tclip - " + Std.string(this.clip),{ fileName : "GeometryState.hx", lineNumber : 72, className : "phoenix.geometry.GeometryState", methodName : "str"});
-		haxe_Log.trace("\t\tclip rect - " + this.clip_x + "," + this.clip_y + "," + this.clip_w + "," + this.clip_h,{ fileName : "GeometryState.hx", lineNumber : 73, className : "phoenix.geometry.GeometryState", methodName : "str"});
-		haxe_Log.trace("\t- GEOMETRYSTATE",{ fileName : "GeometryState.hx", lineNumber : 74, className : "phoenix.geometry.GeometryState", methodName : "str"});
+		if(this.texture != null) null;
+		null;
 	}
 	,clean: function() {
 		this.dirty = false;
@@ -38937,10 +38823,7 @@ phoenix_geometry_PlaneGeometry.__name__ = ["phoenix","geometry","PlaneGeometry"]
 phoenix_geometry_PlaneGeometry.__super__ = phoenix_geometry_Geometry;
 phoenix_geometry_PlaneGeometry.prototype = $extend(phoenix_geometry_Geometry.prototype,{
 	uv: function(_rect) {
-		if(this.state.texture == null) {
-			haxe_Log.trace("Warning : calling UV on a geometry with null texture.",{ fileName : "PlaneGeometry.hx", lineNumber : 45, className : "phoenix.geometry.PlaneGeometry", methodName : "uv"});
-			return;
-		}
+		if(this.state.texture == null) return;
 		var tlx = _rect.x / this.state.texture.width_actual;
 		var tly = _rect.y / this.state.texture.height_actual;
 		var szx = _rect.w / this.state.texture.width_actual;
@@ -39372,10 +39255,7 @@ phoenix_geometry_QuadPackGeometry.prototype = $extend(phoenix_geometry_Geometry.
 		}
 	}
 	,quad_uv: function(_quad_id,_uv) {
-		if(this.state.texture == null) {
-			haxe_Log.trace("Warning : calling UV on a PackedQuad Geometry with null texture.",{ fileName : "QuadPackGeometry.hx", lineNumber : 352, className : "phoenix.geometry.QuadPackGeometry", methodName : "quad_uv"});
-			return;
-		}
+		if(this.state.texture == null) return;
 		var tlx = _uv.x / this.state.texture.width_actual;
 		var tly = _uv.y / this.state.texture.height_actual;
 		var szx = _uv.w / this.state.texture.width_actual;
@@ -39532,10 +39412,7 @@ phoenix_geometry_TextGeometry.prototype = $extend(phoenix_geometry_Geometry.prot
 		if(this.options.text != null) this.set_text(this.options.text);
 	}
 	,set_text: function(_text) {
-		if(_text == null) {
-			haxe_Log.trace("i / textgeometry / " + "null text passed into TextGeometry!",{ fileName : "TextGeometry.hx", lineNumber : 240, className : "phoenix.geometry.TextGeometry", methodName : "set_text"});
-			_text = "";
-		}
+		if(_text == null) _text = "";
 		if(this.text != _text) {
 			this.text = _text;
 			if(this.text != "") {
@@ -40090,7 +39967,7 @@ snow_Snow.prototype = {
 			this.shutdown();
 			break;
 		case 4:
-			haxe_Log.trace("     i / snow / " + "Goodbye.",{ fileName : "Snow.hx", lineNumber : 351, className : "snow.Snow", methodName : "on_event"});
+			null;
 			break;
 		default:
 		} else {
@@ -40636,15 +40513,12 @@ snow_core_web_Core.prototype = {
 	}
 	,request_update: function() {
 		var _g = this;
-		if(($_=window,$bind($_,$_.requestAnimationFrame)) != null) window.requestAnimationFrame($bind(this,this.snow_core_loop)); else {
-			haxe_Log.trace("     i / core / " + ("warning : requestAnimationFrame not found, falling back to render_rate! render_rate:" + this.app.host.render_rate),{ fileName : "Core.hx", lineNumber : 80, className : "snow.core.web.Core", methodName : "request_update"});
-			window.setTimeout(function() {
-				var _now = _g.timestamp();
-				_g._time_now += _now - _g._lf_timestamp;
-				_g.snow_core_loop(_g._time_now * 1000.0);
-				_g._lf_timestamp = _now;
-			},this.app.host.render_rate * 1000.0 | 0);
-		}
+		if(($_=window,$bind($_,$_.requestAnimationFrame)) != null) window.requestAnimationFrame($bind(this,this.snow_core_loop)); else window.setTimeout(function() {
+			var _now = _g.timestamp();
+			_g._time_now += _now - _g._lf_timestamp;
+			_g.snow_core_loop(_g._time_now * 1000.0);
+			_g._lf_timestamp = _now;
+		},this.app.host.render_rate * 1000.0 | 0);
 	}
 	,snow_core_loop: function(_t) {
 		if(_t == null) _t = 0.016;
@@ -40803,7 +40677,6 @@ snow_core_web_assets_Assets.prototype = {
 			if (e instanceof js__$Boot_HaxeError) e = e.val;
 			var tips = "- textures served from file:/// throw security errors\n";
 			tips += "- textures served over http:// work for cross origin byte requests";
-			haxe_Log.trace("   i / assets / " + tips,{ fileName : "Assets.hx", lineNumber : 199, className : "snow.core.web.assets.Assets", methodName : "POT_bytes_from_pixels"});
 			throw new js__$Boot_HaxeError(e);
 		}
 		tmp_canvas = null;
@@ -40830,7 +40703,6 @@ snow_core_web_assets_Assets.prototype = {
 			if (e instanceof js__$Boot_HaxeError) e = e.val;
 			var tips = "- textures served from file:/// throw security errors\n";
 			tips += "- textures served over http:// work for cross origin byte requests";
-			haxe_Log.trace("   i / assets / " + tips,{ fileName : "Assets.hx", lineNumber : 235, className : "snow.core.web.assets.Assets", methodName : "POT_bytes_from_element"});
 			throw new js__$Boot_HaxeError(e);
 		}
 		tmp_canvas = null;
@@ -41196,7 +41068,7 @@ snow_core_web_input_Input.prototype = {
 			window.addEventListener("deviceorientation",$bind(this,this.on_orientation));
 			window.addEventListener("devicemotion",$bind(this,this.on_motion));
 		}
-		haxe_Log.trace("    i / input / " + ("Gamepads supported: " + Std.string(this.gamepads_supported)),{ fileName : "Input.hx", lineNumber : 51, className : "snow.core.web.input.Input", methodName : "init"});
+		null;
 	}
 	,update: function() {
 		if(this.gamepads_supported) this.poll_gamepads();
@@ -41321,7 +41193,7 @@ snow_core_web_input_Input.prototype = {
 	}
 	,fail_gamepads: function() {
 		this.gamepads_supported = false;
-		haxe_Log.trace("    i / input / " + "Gamepads are not supported in this browser :(",{ fileName : "Input.hx", lineNumber : 308, className : "snow.core.web.input.Input", methodName : "fail_gamepads"});
+		null;
 	}
 	,get_gamepad_list: function() {
 		if(($_=window.navigator,$bind($_,$_.getGamepads)) != null) return window.navigator.getGamepads();
@@ -41504,10 +41376,7 @@ snow_core_web_io_IO.prototype = {
 	,string_slot_destroy: function(_slot) {
 		if(_slot == null) _slot = 0;
 		var storage = window.localStorage;
-		if(storage == null) {
-			haxe_Log.trace("       i / io / " + "localStorage isnt supported in this browser?!",{ fileName : "IO.hx", lineNumber : 115, className : "snow.core.web.io.IO", methodName : "string_slot_destroy"});
-			return false;
-		}
+		if(storage == null) return false;
 		var _id = this.string_slot_id(_slot);
 		storage.removeItem(_id);
 		return false;
@@ -41515,10 +41384,7 @@ snow_core_web_io_IO.prototype = {
 	,string_slot_save: function(_slot,_contents) {
 		if(_slot == null) _slot = 0;
 		var storage = window.localStorage;
-		if(storage == null) {
-			haxe_Log.trace("       i / io / " + "localStorage isnt supported in this browser?!",{ fileName : "IO.hx", lineNumber : 132, className : "snow.core.web.io.IO", methodName : "string_slot_save"});
-			return false;
-		}
+		if(storage == null) return false;
 		var _id = this.string_slot_id(_slot);
 		storage.setItem(_id,_contents);
 		return true;
@@ -41526,10 +41392,7 @@ snow_core_web_io_IO.prototype = {
 	,string_slot_load: function(_slot) {
 		if(_slot == null) _slot = 0;
 		var storage = window.localStorage;
-		if(storage == null) {
-			haxe_Log.trace("       i / io / " + "localStorage isnt supported in this browser?!",{ fileName : "IO.hx", lineNumber : 150, className : "snow.core.web.io.IO", methodName : "string_slot_load"});
-			return null;
-		}
+		if(storage == null) return null;
 		var _id = this.string_slot_id(_slot);
 		return storage.getItem(_id);
 	}
@@ -42051,19 +41914,19 @@ snow_system_audio_Sound.prototype = {
 		this.system.off(this.name,_event,_handler);
 	}
 	,play: function() {
-		haxe_Log.trace("    i / sound / " + "Sound:play called in root Sound module. Nothing will happen.",{ fileName : "Sound.hx", lineNumber : 102, className : "snow.system.audio.Sound", methodName : "play"});
+		null;
 	}
 	,loop: function() {
-		haxe_Log.trace("    i / sound / " + "Sound:loop called in root Sound module. Nothing will happen.",{ fileName : "Sound.hx", lineNumber : 104, className : "snow.system.audio.Sound", methodName : "loop"});
+		null;
 	}
 	,stop: function() {
-		haxe_Log.trace("    i / sound / " + "Sound:stop called in root Sound module. Nothing will happen.",{ fileName : "Sound.hx", lineNumber : 106, className : "snow.system.audio.Sound", methodName : "stop"});
+		null;
 	}
 	,pause: function() {
-		haxe_Log.trace("    i / sound / " + "Sound:pause called in root Sound module. Nothing will happen.",{ fileName : "Sound.hx", lineNumber : 108, className : "snow.system.audio.Sound", methodName : "pause"});
+		null;
 	}
 	,destroy: function() {
-		haxe_Log.trace("    i / sound / " + "Sound:destroy called in root Sound module. Nothing will happen.",{ fileName : "Sound.hx", lineNumber : 110, className : "snow.system.audio.Sound", methodName : "destroy"});
+		null;
 	}
 	,internal_update: function() {
 	}
@@ -42161,10 +42024,7 @@ snow_modules_howlerjs_sound_Sound.prototype = $extend(snow_system_audio_Sound.pr
 	set_info: function(_info) {
 		if(this.get_info() != null) this.destroy();
 		this.info = null;
-		if(_info == null) {
-			haxe_Log.trace("    i / sound / " + "not creating sound, info was null",{ fileName : "Sound.hx", lineNumber : 29, className : "snow.modules.howlerjs.sound.Sound", methodName : "set_info"});
-			return this.get_info();
-		}
+		if(_info == null) return this.get_info();
 		this.info = _info;
 		this.set_loaded(true);
 		return this.get_info();
@@ -42898,7 +42758,6 @@ snow_system_audio_Audio.prototype = {
 		if(_name == null) _name = "";
 		var _g = this;
 		if(_name == "") _name = this.app.make_uniqueid();
-		haxe_Log.trace("    i / audio / " + ("creating sound named " + _name + " (stream: " + (_streaming == null?"null":"" + _streaming) + ")"),{ fileName : "Audio.hx", lineNumber : 53, className : "snow.system.audio.Audio", methodName : "create"});
 		return new snow_api_Promise(function(resolve,reject) {
 			var _create = _g.module.create_sound(_id,_name,_streaming);
 			_create.then(function(_sound) {
@@ -42919,7 +42778,7 @@ snow_system_audio_Audio.prototype = {
 	}
 	,uncreate: function(_name) {
 		var _sound = this.sound_list.get(_name);
-		if(_sound == null) haxe_Log.trace("    i / audio / " + ("can't find sound, unable to uncreate, use create first: " + _name),{ fileName : "Audio.hx", lineNumber : 99, className : "snow.system.audio.Audio", methodName : "uncreate"});
+		if(_sound == null) null;
 		_sound.destroy();
 	}
 	,add: function(sound) {
@@ -43022,7 +42881,6 @@ snow_system_audio_Audio.prototype = {
 	}
 	,suspend: function() {
 		if(!this.active) return;
-		haxe_Log.trace("    i / audio / " + "suspending sound context",{ fileName : "Audio.hx", lineNumber : 354, className : "snow.system.audio.Audio", methodName : "suspend"});
 		this.active = false;
 		var $it0 = this.stream_list.iterator();
 		while( $it0.hasNext() ) {
@@ -43033,7 +42891,6 @@ snow_system_audio_Audio.prototype = {
 	}
 	,resume: function() {
 		if(this.active) return;
-		haxe_Log.trace("    i / audio / " + "resuming sound context",{ fileName : "Audio.hx", lineNumber : 372, className : "snow.system.audio.Audio", methodName : "resume"});
 		this.active = true;
 		this.module.resume();
 		var $it0 = this.stream_list.iterator();
@@ -43428,10 +43285,7 @@ snow_system_window_Window.prototype = {
 	on_window_created: function(_handle,_id,_configs) {
 		this.id = _id;
 		this.handle = _handle;
-		if(this.handle == null) {
-			haxe_Log.trace("   i / window / " + "failed to create window",{ fileName : "Window.hx", lineNumber : 92, className : "snow.system.window.Window", methodName : "on_window_created"});
-			return;
-		}
+		if(this.handle == null) return;
 		this.closed = false;
 		this.config = _configs.config;
 		this.system.app.config.render = _configs.render_config;
@@ -43899,18 +43753,17 @@ states_Game.__super__ = luxe_State;
 states_Game.prototype = $extend(luxe_State.prototype,{
 	onenter: function(_) {
 		var _g = this;
+		Level.spike_blockID = 0;
+		this.IDLastLevelCreated = 0;
 		states_Game.levels = new haxe_ds_IntMap();
 		var res = Luxe.resources.cache.get("assets/maps/initial_map.tmx");
-		this.level = new Level({ tiled_file_data : res.asset.text, pos : new phoenix_Vector(0,Luxe.core.screen.get_h() / 2), asset_path : "assets/images"});
-		this.level.display({ visible : true, scale : 1});
 		var _g1 = 0;
-		var _g2 = Math.floor(Luxe.core.screen.get_h() / 80) + 1;
-		while(_g1 < _g2) {
+		while(_g1 < 6) {
 			var y = _g1++;
-			this.create_level(y);
+			this.create_level();
 		}
-		Luxe.events.listen("create_one_level",function(_1) {
-			_g.create_level(_g.IDLastLevelCreated + 1);
+		this.create_level_event_id = Luxe.events.listen("create_level",function(_1) {
+			_g.create_level();
 		});
 		this.connect_input();
 		Luxe.physics.nape.space.zpp_inner.wrap_listeners.add(new nape_callbacks_PreListener((function($this) {
@@ -43937,14 +43790,16 @@ states_Game.prototype = $extend(luxe_State.prototype,{
 		Main.foregroundBatcherCamera.get_pos().set_x(-components_CameraFollower.screenMiddle.x);
 		Main.foregroundBatcherCamera.get_pos().set_y(-components_CameraFollower.screenMiddle.y);
 	}
-	,create_level: function(y) {
+	,create_level: function() {
 		var map_ID = Luxe.utils.random["int"](-2,29);
 		map_ID = Math.floor(Math.max(1,Math.min(map_ID,27)));
+		if(this.IDLastLevelCreated == 0) map_ID = 0;
 		var res = Luxe.resources.cache.get("assets/maps/map_" + map_ID + ".tmx");
-		var level = new Level({ tiled_file_data : res.asset.text, pos : new phoenix_Vector(0,this.level.height * 16 - y * 80), asset_path : "assets/images"});
-		states_Game.levels.h[y] = level;
+		var level = new Level({ tiled_file_data : res.asset.text, pos : new phoenix_Vector(0,-(this.IDLastLevelCreated * 80)), asset_path : "assets/images"});
+		level.setID(this.IDLastLevelCreated);
 		level.display({ visible : true, scale : 1});
-		this.IDLastLevelCreated = y;
+		states_Game.levels.h[this.IDLastLevelCreated] = level;
+		this.IDLastLevelCreated++;
 	}
 	,oneWayCollision: function(cb) {
 		var colArb = cb.zpp_inner.pre_arbiter.wrapper().get_collisionArbiter();
@@ -43985,21 +43840,22 @@ states_Game.prototype = $extend(luxe_State.prototype,{
 		this.background_1.uv.set_y(Luxe.camera.get_pos().y * 0.8);
 		this.background_2.uv.set_x(Luxe.camera.get_pos().x * 0.4);
 		this.background_2.uv.set_y(Luxe.camera.get_pos().y * 0.4);
-		this.text.set_text(Std.string(Math.abs(components_CameraFollower.currentPositionNormal.y - 2)));
+		this.text.set_text(Std.string(Math.abs(components_CameraFollower.currentPositionNormal.y)));
 		var $it0 = states_Game.levels.iterator();
 		while( $it0.hasNext() ) {
 			var level = $it0.next();
-			if(level.pos != null) level.update(dt);
+			if(level.destroyed == false) level.update(dt);
 		}
 	}
 	,onleave: function(_) {
-		this.level.clear();
-		this.level = null;
 		this.IDLastLevelCreated = 0;
 		this.background_1.destroy();
 		this.background_1 = null;
 		this.background_2.destroy();
 		this.background_2 = null;
+		Luxe.events.unlisten(this.create_level_event_id);
+		states_Game.player.destroy();
+		states_Game.player = null;
 		var $it0 = states_Game.levels.iterator();
 		while( $it0.hasNext() ) {
 			var level = $it0.next();
@@ -84461,6 +84317,7 @@ var ArrayBuffer = (Function("return typeof ArrayBuffer != 'undefined' ? ArrayBuf
 if(ArrayBuffer.prototype.slice == null) ArrayBuffer.prototype.slice = js_html_compat_ArrayBuffer.sliceImpl;
 var DataView = (Function("return typeof DataView != 'undefined' ? DataView : null"))() || js_html_compat_DataView;
 var Uint8Array = (Function("return typeof Uint8Array != 'undefined' ? Uint8Array : null"))() || js_html_compat_Uint8Array._new;
+Level.spike_blockID = 0;
 Luxe.version = "dev";
 Luxe.build = "+4b80329f1c";
 Main.zoom = 1;
