@@ -33127,12 +33127,14 @@ objects_states_player_Jump.prototype = $extend(objects_states_player_Move.protot
 		this.jumps = 1;
 		this.player.onGround = false;
 		this.player.body.get_velocity().set_y(this.jumpForce);
-		this.player.events.listen("animation.shoot.end",function(_) {
-			Luxe.timer.schedule(0.1,function() {
-				_g.player.anim.set_animation("jump");
-				_g.player.anim.play();
-			});
+		this.animation_end_event_id = this.player.events.listen("animation.shoot.end",function(_) {
+			_g.player.anim.set_animation("jump");
+			_g.player.anim.play();
 		});
+	}
+	,onLeave: function() {
+		objects_states_player_Move.prototype.onLeave.call(this);
+		this.player.events.unlisten(this.animation_end_event_id);
 	}
 	,__class__: objects_states_player_Jump
 });
@@ -33162,12 +33164,14 @@ objects_states_player_Walk.prototype = $extend(objects_states_player_Move.protot
 	,onEnter: function() {
 		var _g = this;
 		objects_states_player_Move.prototype.onEnter.call(this);
-		this.player.events.listen("animation.shoot.end",function(_) {
-			Luxe.timer.schedule(0.1,function() {
-				_g.player.anim.set_animation("walk");
-				_g.player.anim.play();
-			});
+		this.animation_end_event_id = this.player.events.listen("animation.shoot.end",function(_) {
+			_g.player.anim.set_animation("walk");
+			_g.player.anim.play();
 		});
+	}
+	,onLeave: function() {
+		objects_states_player_Move.prototype.onLeave.call(this);
+		this.player.events.unlisten(this.animation_end_event_id);
 	}
 	,__class__: objects_states_player_Walk
 });
