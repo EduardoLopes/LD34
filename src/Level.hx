@@ -19,12 +19,17 @@ import states.Game;
 import components.CameraFollower;
 
 import objects.SpikeBlock;
+import objects.Player;
+
+
 
 class Level extends TiledLevel{
 
   var body : Body;
   var entities : Map<String, engine.Sprite>;
-  var level_ID : Int = 0;
+  var level_ID : Int;
+  static public var spike_blockID = 0;
+  public var destroyed : Bool = false;
 
   public function new(options:TiledMapOptions){
 
@@ -57,12 +62,11 @@ class Level extends TiledLevel{
       entity.onObjectsLoaded();
     }
 
-    //Game.drawer.add(body);
-
   }
 
   public function setID(ID : Int){
     level_ID = ID;
+
   }
 
   function loadObjects(){
@@ -70,7 +74,16 @@ class Level extends TiledLevel{
     for(objectsLayer in tiledmap_data.object_groups){
       for(object in objectsLayer.objects){
 
-        entities.set( object.name, Type.createInstance( Type.resolveClass( 'objects.'+object.type ), [object, this] ) );
+        switch object.type {
+          case 'SpikeBlock':
+
+            var block = new SpikeBlock(object, this);
+            entities.set( block.name, block );
+
+          case 'Player':
+            Game.player = new Player(object, this);
+
+        }
 
       }
     }
@@ -86,11 +99,13 @@ class Level extends TiledLevel{
 
   public function clear(){
 
+    destroyed = true;
+
     for( entity in entities ){
-      if(entity != null){
-        entity.destroy();
-        entity = null;
-      }
+
+      entity.destroy();
+      entity = null;
+
     }
 
     if(body != null){
@@ -108,10 +123,10 @@ class Level extends TiledLevel{
 
   public function update(dt:Float){
 
-    if(pos.y > Luxe.camera.pos.y + Main.gameResolution.y + (CameraFollower.cameraOffset.y / 2)){
+    if(CameraFollower.currentPositionNormal.y < -2 && Math.abs(CameraFollower.currentPositionNormal.y) - 3 == level_ID){
 
+      Luxe.events.fire('create_level');
       clear();
-      Luxe.events.fire('create_one_level');
 
     }
 

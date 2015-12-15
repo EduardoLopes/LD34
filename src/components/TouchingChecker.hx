@@ -48,6 +48,10 @@ class TouchingChecker extends Component {
   */
   var touchingFunctionUpdated:Bool = false;
 
+  var preListener_collision : PreListener;
+  var interactionListener_ongoing : InteractionListener;
+  var interactionListener_end : InteractionListener;
+
   public function new(componentName:String, ObjectType1 : CbType, ObjectType2 : CbType){
 
     super({name: componentName});
@@ -61,30 +65,55 @@ class TouchingChecker extends Component {
 
     object = cast entity;
 
-    Luxe.physics.nape.space.listeners.add(new PreListener(
+    preListener_collision = new PreListener(
       InteractionType.COLLISION,
       objectType1,
       objectType2,
       preOnGoing,
       /*precedence*/ 0,
       /*pure*/ true
-    ));
+    );
 
-    Luxe.physics.nape.space.listeners.add(new InteractionListener(
+    interactionListener_ongoing = new InteractionListener(
       CbEvent.ONGOING, InteractionType.COLLISION,
       objectType1,
       objectType2,
       onGoing
-    ));
+    );
 
-    Luxe.physics.nape.space.listeners.add(new InteractionListener(
+    interactionListener_end = new InteractionListener(
       CbEvent.END, InteractionType.COLLISION,
       objectType1,
       objectType2,
       end
-    ));
+    );
+
+    Luxe.physics.nape.space.listeners.add(preListener_collision);
+    Luxe.physics.nape.space.listeners.add(interactionListener_ongoing);
+    Luxe.physics.nape.space.listeners.add(interactionListener_end);
 
   }
+
+  override function onremoved(){
+
+    if(preListener_collision != null){
+      Luxe.physics.nape.space.listeners.remove(preListener_collision);
+    }
+
+    if(interactionListener_ongoing != null){
+      Luxe.physics.nape.space.listeners.remove(interactionListener_ongoing);
+    }
+
+    if(interactionListener_end != null){
+      Luxe.physics.nape.space.listeners.remove(interactionListener_end);
+    }
+
+    preListener_collision = null;
+    interactionListener_ongoing = null;
+    interactionListener_end = null;
+
+  }
+
 
   function preOnGoing(cb:PreCallback):PreFlag {
 
@@ -98,39 +127,24 @@ class TouchingChecker extends Component {
   function checkAbriter(arbiter:Arbiter):Void{
 
     var colArb = arbiter.collisionArbiter;
-    var body1 = colArb.body1;
-    var body2 = colArb.body2;
-    var arbiters;
 
-    if(swapped){
-      arbiters = body2.arbiters;
+    if(!swapped){
+
+      if(colArb.normal.y == 1) touching |= Touching.BOTTOM;
+      if(colArb.normal.x == 1) touching |= Touching.LEFT;
+
+      if(colArb.normal.y == -1) touching |= Touching.TOP;
+      if(colArb.normal.x == -1) touching |= Touching.RIGHT;
+
     } else {
-      arbiters = body1.arbiters;
+
+      if(colArb.normal.y == -1) touching |= Touching.BOTTOM;
+      if(colArb.normal.x == -1) touching |= Touching.LEFT;
+
+      if(colArb.normal.y == 1) touching |= Touching.TOP;
+      if(colArb.normal.x == 1) touching |= Touching.RIGHT;
+
     }
-
-    arbiters.foreach(function (obj):Void {
-
-      if(obj.state == PreFlag.IGNORE || obj.state == PreFlag.IGNORE_ONCE) return null;
-
-      if(!swapped){
-
-        if(obj.collisionArbiter.normal.y == 1) touching |= Touching.BOTTOM;
-        if(obj.collisionArbiter.normal.x == 1) touching |= Touching.LEFT;
-
-        if(obj.collisionArbiter.normal.y == -1) touching |= Touching.TOP;
-        if(obj.collisionArbiter.normal.x == -1) touching |= Touching.RIGHT;
-
-      } else {
-
-        if(obj.collisionArbiter.normal.y == 1) touching |= Touching.TOP;
-        if(obj.collisionArbiter.normal.x == 1) touching |= Touching.RIGHT;
-
-        if(obj.collisionArbiter.normal.y == -1) touching |= Touching.BOTTOM;
-        if(obj.collisionArbiter.normal.x == -1) touching |= Touching.LEFT;
-
-      }
-
-    });
 
   }
 

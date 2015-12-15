@@ -53,6 +53,8 @@ class Player extends Sprite {
   public var laserUp : LaserUp;
   public var anim : SpriteAnimation;
 
+  static public var public_position : Vector;
+
   public function new (object:TiledObject, level : Level){
 
     super({
@@ -62,6 +64,8 @@ class Player extends Sprite {
       depth: 3.4,
       size: new Vector(16, 16)
     });
+
+    public_position = new Vector();
 
     laserSides = new LaserSides(pos.x, pos.y);
     laserUp = new LaserUp(pos.x, pos.y);
@@ -85,6 +89,9 @@ class Player extends Sprite {
 
     body = physics.body;
     core = physics.core;
+
+    core.filter.collisionGroup = 1 | 4;
+    core.filter.collisionMask = ~4;
 
     Luxe.camera.get('follower').setFollower(this);
 
@@ -137,22 +144,9 @@ class Player extends Sprite {
 
   override public function ondestroy(){
 
-    if(this.geometry != null) this.geometry.drop(true);
-
-    if(has('player-floor')){
-      remove('player-floor');
-    }
-
     super.ondestroy();
 
-    visible = false;
-    active = false;
-
-    if(body != null){
-      Luxe.physics.nape.space.bodies.remove(body);
-    }
-    body = null;
-    core = null;
+    states.set('none');
 
     events.unlisten('player-floor_onBottom');
     events.unlisten('player-floor_offBottom');
@@ -162,6 +156,18 @@ class Player extends Sprite {
     events.unlisten('player-floor_offLeft');
     events.unlisten('player-floor_onRight');
     events.unlisten('player-floor_offRight');
+
+    laserSides.destroy();
+    laserSides = null;
+    laserUp.destroy();
+    laserUp = null;
+
+    if(body != null){
+      Luxe.physics.nape.space.bodies.remove(body);
+    }
+
+    body = null;
+    core = null;
 
   }
 
@@ -176,7 +182,8 @@ class Player extends Sprite {
 
     pos = pos.int();
 
-
+    public_position.x = pos.x;
+    public_position.y = pos.y;
 
   }
 

@@ -52,13 +52,7 @@ class LaserSides extends engine.Sprite {
       texture: Luxe.resources.texture('assets/images/laser_sides.png')
     });
 
-
-
     visible = false;
-
-/*  states = new StateMachine();
-    states.add( new Jump( this ) );
-    states.add( new Walk( this ) );*/
 
     type = new CbType();
 
@@ -72,6 +66,9 @@ class LaserSides extends engine.Sprite {
     core = physics.core;
 
     core.sensorEnabled = true;
+
+    core.filter.collisionGroup = 1 | 2;
+    core.filter.collisionMask = ~4;
 
     body.position.x = pos.x;
     body.position.y = pos.y;
@@ -131,20 +128,14 @@ class LaserSides extends engine.Sprite {
 
   override public function ondestroy(){
 
-    if(this.geometry != null) this.geometry.drop(true);
-
     super.ondestroy();
-
-    Game.drawer.remove(body);
 
     if(body != null){
       Luxe.physics.nape.space.bodies.remove( body );
     }
+
     body = null;
     core = null;
-
-    //clean up state events
-    //states.set('none');
 
   }
 

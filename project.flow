@@ -25,14 +25,18 @@
       dependencies : {
         luxe : '*',
         nape : '*'
-      }
+      },
+
+      defines:['no-traces', 'no_debug_console']
+
     },
 
     files : {
       assets : 'assets/',
-      index : { path:'custom_index.html => index.html', template:'project', not_listed:true }
+      index : {
+        path:'custom_index.html => index.html',
+        template:'project', not_listed:true
+      }
     }
-
   }
-
 }

@@ -16,18 +16,22 @@ import luxe.physics.nape.DebugDraw;
 import components.CameraFollower;
 
 import luxe.Text;
+import objects.Player;
+
+import objects.SpikeBlock;
 
 import phoenix.Texture.ClampType;
 
 class Game extends State {
 
-  var level : Level;
   public static var drawer : DebugDraw;
   public static var levels : Map<Int, Level>;
   var IDLastLevelCreated : Int = 0;
   var background_1 : luxe.Sprite;
   var background_2 : luxe.Sprite;
   var text : Text;
+  public static var player : Player;
+  var create_level_event_id:String;
 
   public function new() {
 
@@ -43,27 +47,22 @@ class Game extends State {
 
   override function onenter<T>(_:T) {
 
+    Level.spike_blockID = 0;
+    IDLastLevelCreated = 0;
+
     levels = new Map();
 
     var res = Luxe.resources.text('assets/maps/initial_map.tmx');
 
-    level = new Level({
-      tiled_file_data:res.asset.text,
-      pos : new Vector(0,Luxe.screen.h / 2),
-      asset_path: 'assets/images'
-    });
+    for(y in 0...6){
 
-    level.display({ visible: true, scale:1 });
-
-    for(y in 0...Math.floor(Luxe.screen.h / 80) + 1 ){
-
-      create_level(y);
+      create_level();
 
     }
 
-    Luxe.events.listen('create_one_level', function(_){
+    create_level_event_id = Luxe.events.listen('create_level', function(_){
 
-      create_level(IDLastLevelCreated + 1);
+      create_level();
 
     });
 
@@ -123,25 +122,30 @@ class Game extends State {
 
   }
 
-  function create_level(y:Int){
+  function create_level(){
 
     var map_ID = Luxe.utils.random.int(-2, 29);
 
     map_ID = Math.floor(Math.max(1, Math.min(map_ID, 27)));
 
+    if(IDLastLevelCreated == 0){
+      map_ID = 0;
+    }
+
     var res = Luxe.resources.text('assets/maps/map_'+map_ID+'.tmx');
 
     var level = new Level({
       tiled_file_data: res.asset.text,
-      pos : new Vector(0, (level.height * 16) - y * 80),
+      pos : new Vector(0, -(IDLastLevelCreated * 80)) ,
       asset_path: 'assets/images'
     });
 
-    levels.set(y, level);
-
+    level.setID(IDLastLevelCreated);
     level.display({ visible: true, scale:1 });
 
-    IDLastLevelCreated = y;
+    levels.set(IDLastLevelCreated, level);
+
+    IDLastLevelCreated++;
 
   }
 
@@ -180,11 +184,11 @@ class Game extends State {
     background_2.uv.x = (Luxe.camera.pos.x) * 0.4;
     background_2.uv.y = (Luxe.camera.pos.y) * 0.4;
 
-    text.text = Std.string(Math.abs(CameraFollower.currentPositionNormal.y - 2));
+    text.text = Std.string(Math.abs(CameraFollower.currentPositionNormal.y));
 
     for(level in levels){
 
-      if(level.pos != null){
+      if(level.destroyed == false){
         level.update(dt);
       }
 
@@ -194,14 +198,17 @@ class Game extends State {
 
   override function onleave<T>(_:T) {
 
-    level.clear();
-    level = null;
     IDLastLevelCreated = 0;
 
     background_1.destroy();
     background_1 = null;
     background_2.destroy();
     background_2 = null;
+
+    Luxe.events.unlisten(create_level_event_id);
+
+    player.destroy();
+    player = null;
 
     for(level in levels){
       if(level != null){

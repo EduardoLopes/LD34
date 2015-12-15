@@ -54,10 +54,6 @@ class LaserUp extends engine.Sprite {
 
     visible = false;
 
-/*  states = new StateMachine();
-    states.add( new Jump( this ) );
-    states.add( new Walk( this ) );*/
-
     type = new CbType();
 
     physics = add(new BodySetup({
@@ -133,11 +129,7 @@ class LaserUp extends engine.Sprite {
 
   override public function ondestroy(){
 
-    if(this.geometry != null) this.geometry.drop(true);
-
     super.ondestroy();
-
-    Game.drawer.remove(body);
 
     if(body != null){
       Luxe.physics.nape.space.bodies.remove( body );
@@ -145,9 +137,6 @@ class LaserUp extends engine.Sprite {
 
     body = null;
     core = null;
-
-    //clean up state events
-    //states.set('none');
 
   }
 

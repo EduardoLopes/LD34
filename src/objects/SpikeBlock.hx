@@ -35,10 +35,12 @@ class SpikeBlock extends engine.Sprite {
   public var invencible : Bool = false;
 
 
-  function new (object:Dynamic, level : Level){
+  public function new (object:Dynamic, level : Level){
+
+    Level.spike_blockID++;
 
     super({
-      name: object.type,
+      name: object.type+'.'+Level.spike_blockID,
       name_unique: true,
       pos: new Vector(level.pos.x + object.pos.x + 8, level.pos.y + object.pos.y + 8),
       size: new Vector(16, 16),
@@ -94,10 +96,7 @@ class SpikeBlock extends engine.Sprite {
 
     events.listen('animation.dead.end', function(_){
 
-      visible = false;
-
       destroy();
-
 
     });
 
@@ -112,24 +111,11 @@ class SpikeBlock extends engine.Sprite {
       states.set('none');
     }
 
-
   };
 
   override public function ondestroy(){
 
-    if(this.geometry != null) this.geometry.drop(true);
-
-    if(has('player-block')){
-      remove('player-block');
-    }
-
-    if(has('block-floor')){
-      remove('block-floor');
-    }
-
-    if(has('block-block')){
-      remove('block-block');
-    }
+    states.set('none');
 
     super.ondestroy();
 
@@ -138,8 +124,6 @@ class SpikeBlock extends engine.Sprite {
     }
     body = null;
     core = null;
-
-    states.set('none');
 
   }
 

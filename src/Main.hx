@@ -31,10 +31,12 @@ class Main extends luxe.Game {
   public static var state: States;
   public static var materials : Materials;
 
-
   override function config(config:luxe.AppConfig) {
 
     gameResolution = new Vector(config.window.width, config.window.height);
+
+    config.window.width = config.window.width * zoom;
+    config.window.height = config.window.height * zoom;
 
     return config;
 
@@ -53,7 +55,7 @@ class Main extends luxe.Game {
         { id : 'assets/jsons/player_animation.json' }
       ],
       texts : [
-        {id : 'assets/maps/initial_map.tmx'},
+        {id : 'assets/maps/map_0.tmx'},
         {id : 'assets/maps/map_1.tmx'},
         {id : 'assets/maps/map_2.tmx'},
         {id : 'assets/maps/map_3.tmx'},
@@ -135,11 +137,15 @@ class Main extends luxe.Game {
     Luxe.camera.add(new CameraShaker({name: 'shaker'}));
     Luxe.camera.add(new CameraFollower({name: 'follower'}));
 
+
+
     parcel.load();
 
   } //ready
 
   function onLoaded(_){
+
+      update_camera_scale();
 
     state.set('game');
 
@@ -177,7 +183,7 @@ class Main extends luxe.Game {
 
   }
 
-  override function onwindowsized( e:WindowEvent ):Void {
+  function update_camera_scale(){
 
     zoomRatio.x = Math.floor(Luxe.screen.w / gameResolution.x);
     zoomRatio.y = Math.floor(Luxe.screen.h / gameResolution.y);
@@ -194,6 +200,12 @@ class Main extends luxe.Game {
     foregroundBatcherCamera.viewport.set(x, y, width, height);
 
     Luxe.camera.get('follower').onWindowResized();
+
+  }
+
+  override function onwindowsized( e:WindowEvent ):Void {
+
+    update_camera_scale();
 
   }
 
